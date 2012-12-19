@@ -1,9 +1,18 @@
 body {
   background-image: url(/assets/images/bright_squares.png);
+  font-family: "Lucida Grande", "Arial", "STHeiti", "Microsoft YaHei", sans-serif;
+}
+
+a:hover {
+  text-decoration: none;
 }
 
 div.container {
   width: 710px;
+}
+
+div.container > header {
+  font-family: "Droid Serif", serif;
 }
 
 section.site-name {
@@ -14,21 +23,42 @@ section.nav {
   margin-top: 15px;
 }
 
-div#content article {
-  border: #DADADA solid 1px;
-  border-radius: 4px;
-  padding: 12px;
+div#content .well {
+  margin-bottom: 2em;
   background-color: #FAFAFA;
-  margin-bottom: 4em;
 }
 
-div#content article section.post {
+div#content article section.post,
+div#content section.content {
+  font-size: 14px;
+  line-height: 1.7em;
+}
+
+div#content article section.post li {
   line-height: 1.6em;
-  font-family: "Lucida Grande", "Arial", "STHeiti", "Microsoft YaHei", sans-serif;
+}
+
+code {
+  padding: 0px 2px;
+}
+
+div.more-archive {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+div.more-archive div.circle {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  line-height: 1em;
+  border-radius: 0.4em;
+  background-color: #808080;
 }
 
 footer.contentinfo {
+  font-family: "Helvetica Neue", "Helvetica";
   text-align: center;
   color: #8A8A8A;
-  font-size: 8pt;
+  font-size: 9px;
 }

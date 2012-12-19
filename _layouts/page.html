@@ -3,16 +3,22 @@ layout: default
 ---
 
 <div>
-<article role="article">
+<article role="article" class="well">
   <header>
-    <h1 class="entry-title">{{ page.title }}</h1>
-    <p class="meta">{{ page.date }}</p>
+    <section class="title">
+      <h4>{{ page.title }}</h4>
+    </section>
+    <section class="meta">
+      <p class="date">{{ page.date }}</p>
+    </section>
   </header>
-  {{ content }}
+  <section class="content">
+    {{ content }}
+  </section>
 </article>
 {% if page.comments == true %}
 <section>
-  <h1>Comments</h1>
+  <h4>Comments</h4>
 </section>
 {% endif %}
 </div>

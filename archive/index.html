@@ -1,0 +1,18 @@
+---
+layout: page
+---
+
+{% for post in site.posts %}
+  {% assign post_year = post.date | date: "%Y" %}
+  {% if year and post_year != year %}
+    </ul>
+    </section>
+  {% endif %}
+  {% unless year and post_year == year %}
+    {% assign year = post_year %}
+    <section class="{{ year }}-list">
+      <p class="year">{{ year }}</p>
+      <ul>
+  {% endunless %}
+  <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+{% endfor %}

@@ -8,9 +8,9 @@ layout: default
   {% assign content = post.content %}
   {% include article.html %}
   {% endfor %}
-  <div class="pagination">
+  <div class="more-archive">
     {% if site.posts | size > 6 %}
-    <a href="/archive">$</a>
+    <a href="/archive"><div class="circle">&nbsp;</div></a>
     {% endif %}
   </div>
 </div>
