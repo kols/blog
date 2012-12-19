@@ -1,0 +1,6 @@
+name: blue
+permalink: /:year/:month/:title
+base_url: /
+markdown: rdiscount
+exclude: [Gemfile, Gemfile.lock]
+pygments: true

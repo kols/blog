@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/style.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      {% if page.title %}{{ page.title }} | {% endif %}{{ site.name }}
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h3 class="site-name"><a href="/">{{ site.name }}</a></h3>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              {% include nav.html %}
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        {{ content }}
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+          <span class="copy">&copy; 2004-2012 kane</span>
+          |
+          <span class="engine">
+            powered by <a href="https://github.com/mojombo/jekyll">jekyll</a>
+          </span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

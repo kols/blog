@@ -1,0 +1,34 @@
+body {
+  background-image: url(/assets/images/bright_squares.png);
+}
+
+div.container {
+  width: 710px;
+}
+
+section.site-name {
+  margin-left: 2px;
+}
+
+section.nav {
+  margin-top: 15px;
+}
+
+div#content article {
+  border: #DADADA solid 1px;
+  border-radius: 4px;
+  padding: 12px;
+  background-color: #FAFAFA;
+  margin-bottom: 4em;
+}
+
+div#content article section.post {
+  line-height: 1.6em;
+  font-family: "Lucida Grande", "Arial", "STHeiti", "Microsoft YaHei", sans-serif;
+}
+
+footer.contentinfo {
+  text-align: center;
+  color: #8A8A8A;
+  font-size: 8pt;
+}
