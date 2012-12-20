@@ -1,6 +1,10 @@
-name: blue
+name: kanedou.me
 permalink: /:year/:month/:title
+url: http://kanedou.me
 base_url: /
 markdown: rdiscount
 exclude: [Gemfile, Gemfile.lock]
 pygments: true
+
+# Disqus Comments
+disqus_short_name: kdblue

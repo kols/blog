@@ -2,11 +2,10 @@
 layout: default
 ---
 
-<div>
 <article role="article" class="well">
   <header>
     <section class="title">
-      <h4>{{ page.title }}</h4>
+      <h3>{{ page.title }}</h3>
     </section>
     <section class="meta">
       <p class="date">{{ page.date }}</p>
@@ -16,9 +15,4 @@ layout: default
     {{ content }}
   </section>
 </article>
-{% if page.comments == true %}
-<section>
-  <h4>Comments</h4>
-</section>
-{% endif %}
-</div>
+{% include comments.html %}

@@ -2,11 +2,5 @@
 layout: default
 ---
 
-<div>
-  {% include article.html %}
-  {% if page.comments == true %}
-  <section class="comment">
-    <h4>Comments</h4>
-  </section>
-  {% endif %}
-</div>
+{% include article.html %}
+{% include comments.html %}

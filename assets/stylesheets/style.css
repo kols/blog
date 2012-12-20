@@ -1,63 +1,81 @@
 body {
   background-image: url(/assets/images/bright_squares.png);
-  font-family: "Lucida Grande", "Arial", "STHeiti", "Microsoft YaHei", sans-serif;
+  font-family: "Source Sans Pro", "Lucida Grande", "WenQuanYi Micro Hei", "STHeiti", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif;
 }
 
-a:hover {
-  text-decoration: none;
+a:hover { text-decoration: none; }
+section.site-name a:hover { color: #08C; }
+#content a:hover { text-shadow: 1px 1px 2px #08C; }
+
+#content a {
+  -webkit-transition: text-shadow .4s;
+  -moz-transition: text-shadow .4s;
 }
 
-div.container {
-  width: 710px;
+abbr {
+  font-variant: small-caps;
+  text-transform: lowercase;
+  font-weight: 600;
+  letter-spacing: 0.1em;
 }
 
-div.container > header {
-  font-family: "Droid Serif", serif;
-}
+code { padding: 0px 2px; }
 
-section.site-name {
-  margin-left: 2px;
-}
+div.container { width: 699px; }
+div.container > header { font-family: "Droid Serif", serif; }
 
-section.nav {
-  margin-top: 15px;
-}
+section.site-name { margin-left: 2px; }
+section.nav { margin-top: 15px; }
 
 div#content .well {
-  margin-bottom: 2em;
-  background-color: #FAFAFA;
+  margin-bottom: 3em;
+  background-color: #F9F9F9;
+}
+
+article section.title {
+  line-height: 110%;
+  color: #222;
+}
+
+article section.title + section.meta {
+  margin-top: -12px;
+  margin-bottom: 15px;
+  color: #8A8A8A;
+  opacity: 0.6;
+  font-size: 16px;
 }
 
 div#content article section.post,
 div#content section.content {
-  font-size: 14px;
-  line-height: 1.7em;
+  font-size: 16px;
+  line-height: 170%;
+  color: #444;
 }
 
-div#content article section.post li {
-  line-height: 1.6em;
-}
+div#content article li { line-height: 160%; }
 
-code {
-  padding: 0px 2px;
-}
+article + section.comments { margin-top: -1em; }
 
 div.more-archive {
   text-align: center;
   margin-bottom: 20px;
 }
 
-div.more-archive div.circle {
+div.circle {
   display: inline-block;
   width: 0.8em;
   height: 0.8em;
   line-height: 1em;
   border-radius: 0.4em;
   background-color: #808080;
+  -webkit-transition: opacity .6s;
+  -moz-transition: opacity .6s;
+  transition: opacity .6s;
 }
+div.circle:hover { opacity: .5; }
 
 footer.contentinfo {
-  font-family: "Helvetica Neue", "Helvetica";
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   text-align: center;
   color: #8A8A8A;
   font-size: 9px;

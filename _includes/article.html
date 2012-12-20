@@ -2,16 +2,19 @@
 <article role="article" class="well">
   <header>
     <section class="title">
-      <h4>
+      <h3>
         {% if index %}
         <a href="{{ page.url }}">{{ page.title }}</a>
         {% else %}
         {{ page.title }}
         {% endif %}
-      </h4>
+      </h3>
     </section>
     <section class="meta">
-      <p class="date">{{ page.date | date_to_string }}</p>
+      @<time>{{ page.date | date: "%Y-%m-%d" }}</time>
+      {% for cat in page.categories %}
+      <em class="category">#{{ cat }}</em>
+      {% endfor %}
     </section>
   </header>
   <section class="post">
