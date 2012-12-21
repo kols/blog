@@ -54,6 +54,12 @@ div#content section.content {
 
 div#content article li { line-height: 160%; }
 
+div.highlight {
+  margin-left: -19px;
+  margin-right: -19px;
+}
+div.highlight pre { border: none; }
+
 article + section.comments { margin-top: -1em; }
 
 div.more-archive {
