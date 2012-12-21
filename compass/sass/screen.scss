@@ -1,0 +1,89 @@
+@import "base";
+
+body {
+  background-image: url(/assets/images/gray_jean_@2X.jpg);
+  font-family: $bodyFont;
+}
+
+a:hover {
+  text-decoration: none;
+  color: $linkColor;
+}
+
+article a, footer.contentinfo a {
+  @include transition-property(text-shadow);
+  @include transition-duration(.4s);
+  &:hover {
+    color: $linkColor;
+    @include link-hover-shadow;
+  }
+}
+
+abbr {
+  font-variant: small-caps;
+  text-transform: lowercase;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+code { padding: 0px 2px; }
+
+div.container {
+  width: 699px;
+  & > header { font-family: $headerFont; }
+}
+
+section.site-name { margin-left: 2px; }
+section.nav { margin-top: 15px; }
+
+div#content .well {
+  margin-bottom: 3em;
+  background-color: $articleBackgroundColor;
+}
+
+article section.title {
+  line-height: 110%;
+  color: $softBlackHeading;
+}
+
+article section.title + section.meta {
+  margin-top: -12px;
+  margin-bottom: 15px;
+  color: $minorGray;
+  @include opacity(0.6);
+  font-size: 16px;
+}
+
+article section.post,
+section.content {
+  font-size: 16px;
+  line-height: 170%;
+  color: $softBlackBody;
+}
+
+article li { line-height: 160%; }
+
+pre {
+  @include spread-text;
+}
+
+article + section.comments { margin-top: -1em; }
+
+div.more-archive {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+div.circle {
+  @include circle;
+  @include transition-property(opacity);
+  @include transition-duration(.6s);
+  &:hover { @include opacity(0.5); }
+}
+
+footer.contentinfo {
+  font-family: $footerFont;
+  text-align: center;
+  color: $minorGray;
+  font-size: 9px;
+}

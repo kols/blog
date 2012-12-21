@@ -1,0 +1,38 @@
+// font
+$headerFont: "Droid Serif", serif;
+$bodyFont: "Source Sans Pro", "Lucida Grande", "WenQuanYi Micro Hei", "STHeiti", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif;
+$footerFont: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+
+// color
+$minorGray: #8A8A8A;
+$softBlackHeading: #222;
+$softBlackBody: #444;
+$articleBackgroundColor: #F9F9F9;
+
+@import "compass/reset";
+@import "compass_twitter_bootstrap";
+@import "compass/css3";
+
+@mixin link-hover-shadow {
+  @include text-shadow(0 0 2px $linkColor);
+}
+
+@mixin circle {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  line-height: 1em;
+  border-radius: 0.4em;
+  background-color: #808080;
+}
+
+@mixin inset-box {
+  @include box-shadow(rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset);
+}
+
+@mixin spread-text {
+  border: none;
+  margin-left: -19px;
+  margin-right: -19px;
+  padding: 10px 20px;
+}

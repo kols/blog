@@ -3,7 +3,7 @@ permalink: /:year/:month/:title
 url: http://kanedou.me
 base_url: /
 markdown: rdiscount
-exclude: [Gemfile, Gemfile.lock]
+exclude: [Gemfile, Gemfile.lock, compass]
 pygments: true
 
 # Disqus Comments
