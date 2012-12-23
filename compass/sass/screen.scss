@@ -47,11 +47,11 @@ article section.title {
 }
 
 article section.title + section.meta {
-  margin-top: -12px;
+  margin-top: -10px;
   margin-bottom: 15px;
   color: $minorGray;
   @include opacity(0.6);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 article section.post,
@@ -65,6 +65,14 @@ article li { line-height: 160%; }
 
 pre {
   @include spread-text;
+}
+li {
+  & > pre {
+    @include spread-text(1);
+  }
+  li > pre {
+    @include spread-text(2);
+  }
 }
 
 article + section.comments { margin-top: -1em; }

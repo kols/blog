@@ -9,7 +9,7 @@ $softBlackHeading: #222;
 $softBlackBody: #444;
 $articleBackgroundColor: #F9F9F9;
 
-@import "compass/reset";
+//@import "compass/reset";
 @import "compass_twitter_bootstrap";
 @import "compass/css3";
 
@@ -30,9 +30,9 @@ $articleBackgroundColor: #F9F9F9;
   @include box-shadow(rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset);
 }
 
-@mixin spread-text {
+@mixin spread-text($level: 0) {
   border: none;
-  margin-left: -19px;
+  margin-left: -19px + ($level * -25px) ;
   margin-right: -19px;
   padding: 10px 20px;
 }
