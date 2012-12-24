@@ -17,6 +17,9 @@ article a, footer.contentinfo a {
     color: $linkColor;
     @include link-hover-shadow;
   }
+  code {
+    color: $linkColor;
+  }
 }
 
 abbr {
@@ -26,7 +29,23 @@ abbr {
   letter-spacing: 0.1em;
 }
 
-code { padding: 0px 2px; }
+code { padding: 0px 5px; }
+h1, h2, h3, h4, h5, h6 {
+  code {
+    color: $softBlackHeading;
+    border: none;
+    background: transparent;
+  }
+}
+
+img {
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  @include border-radius(4px);
+  @include box-shadow(2px 2px 4px #eee)
+}
 
 div.container {
   width: 699px;
@@ -54,11 +73,14 @@ article section.title + section.meta {
   font-size: 14px;
 }
 
-article section.post,
-section.content {
+section.post, section.content {
   font-size: 16px;
   line-height: 170%;
   color: $softBlackBody;
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
 }
 
 article li { line-height: 160%; }
