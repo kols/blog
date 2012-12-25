@@ -19,7 +19,7 @@ comments: true
 
 ---
 
-### What I made of
+### What I'm made of
 
 - [taridka@last.fm](http://last.fm/user/taridka)
 - [taridka@instagram](http://instagram.com/taridka)
