@@ -12,9 +12,11 @@
     </section>
     <section class="meta">
       @<time>{{ page.date | date: "%Y-%m-%d" }}</time>
-      {% for cat in page.categories %}
-      <em class="category">#{{ cat }}</em>
-      {% endfor %}
+      <span class="categories">
+        {% for cat in page.categories %}
+        <em class="category">#{{ cat }}</em>
+        {% endfor %}
+      </span>
     </section>
   </header>
   <section class="post">
