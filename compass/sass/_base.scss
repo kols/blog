@@ -1,5 +1,5 @@
 // font
-$headerFont: "Droid Serif", serif;
+$headerFont: "Georgia", "Droid Serif", serif;
 $bodyFont: "Source Sans Pro", "Lucida Grande", "WenQuanYi Micro Hei", "STHeiti", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif;
 $footerFont: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 
@@ -10,7 +10,7 @@ $h3FontSize: $titleFontSize * 8 / 12;
 $h4FontSize: $titleFontSize * 7 / 12;
 $h5FontSize: $titleFontSize * 6 / 12;
 $h6FontSize: $titleFontSize * 5 / 12;
-$metaFontSize: 14px;
+$metaFontSize: 13px;
 $contentFontSize: 14px;
 $footerFontSize: 9px;
 $titleLineHeight: 110%;
@@ -32,7 +32,7 @@ $containerSize: 649px;
 @import "compass/css3";
 
 @mixin link-hover-shadow {
-  @include text-shadow(0 0 1px $linkColor);
+  @include text-shadow(0 0 1.5px $linkColor);
 }
 
 @mixin circle {
