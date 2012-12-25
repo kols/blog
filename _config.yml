@@ -1,5 +1,5 @@
 name: kanedou.me
-permalink: /:year/:month/:title
+permalink: /:year/:month/:title/
 url: http://kanedou.me
 base_url: /
 markdown: rdiscount
