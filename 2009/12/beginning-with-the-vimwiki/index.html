@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      初用vimwiki | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        初用vimwiki
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2009-12-24</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>为了能够节约付费主机那寸MB寸$的空间，并且，在偶然的 Google Reader 打发时间之旅中发现了 vimwiki 后，我决定试用之，原因除了上面讲的还得加上那牛*到闪死人的 vim 光环。（又错按 esc 了...）
+vim 的强大自不用多费口舌，今天要写的 vimwiki 则是建筑在其之上的用来做个人笔记的一个——插件，对，只是 vim 的一个插件而已，然而，功能则不算弱，自然，只是针对其受众面而言——这是个人笔记，而非 mediawiki 这种给类似 wikipedia 的这种怪兽级应用使用的 wiki 后台。</p>
+
+<p>现阶段 vimwiki 能做的事情大致有这些：</p>
+
+<ol>
+<li>为笔记附加格式，也就是附加各种纯文本做不到的类似粗斜体、大字号标题等效果。</li>
+<li>直接输出 html，无需依赖任何第三方软件或插件，除了 vim 本身。</li>
+<li>依赖 vim 强大的文本编辑能力大大提高笔记编写以及整理的速度。</li>
+<li>以纯文本也即 plain text 格式保存，无论在哪里都能看能修改，良好的便携性。</li>
+</ol>
+
+
+<p>来说说其具体用法，首先是安装，到 <a href="http://www.vim.org/scripts/script.php?script_id=2226">vimiwiki 插件页面</a>下载最新版并按其页面步骤安装，详细方法如下(Linux)：</p>
+
+<ol>
+<li>解压下载下来的文件得到 <code>vimwiki_*_*.vba</code>，并将其复制到 <code>~/.vim/</code></li>
+<li>用 vim 或 gvim 打开此文件。</li>
+<li>输入命令 <code>:so %</code></li>
+<li>安装完成</li>
+<li>windows 应该也差不多</li>
+</ol>
+
+
+<p>之后用 <code>:h vimwiki</code> 查看其帮助文件以学习如何使用，开头有一个快速入门，十分简单明了，可以看看以便确实地入门，如果之前有编辑 wiki 的经验则应该很快能够上手。此外具体的语法和用法可以看此帮助文件或下载这个 <a href="http://habamax.ru/myvim/data/vimwikiqrc.pdf">pdf</a>。</p>
+
+<p>说说使用感想，再花了一点时间把原来写在自建 moinmoinwiki 中的两篇文章转到vimwiki 中之后，我发现其有一个缺点，即无法在 list 的对象中手动换行，于是我用嵌套 list 的方法（即在 list 对象中需要换行的地方加一个子 list 对象）来变通，基本可以达到效果。另外，其粗体斜体等语法似乎不支持中文。</p>
+
+<p>最后附上一个 <a href="http://dl.dropbox.com/u/2823002/blue_attachs/WordPressSettings.wiki">vimwiki 的原文</a>及一个生成后的 <a href="/notes/WordPressSettings.html">html</a> 以供试看效果。<em>（2010-04-23 22' 由于 dropbox 被墙，链接失效。）</em></p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2009/12/beginning-with-the-vimwiki';
+    var disqus_url = 'http://kanedou.me/2009/12/beginning-with-the-vimwiki';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

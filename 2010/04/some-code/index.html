@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      Some code | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        Some code
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-04-04</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>第一份自己写出来的代码，是一段vim script，主要用途是添加一个function，可以方便的在各个目录间跳转（被我快捷键一设好象就不怎么方便了。。。）。基本就是些运算，字符运算逻辑运算，其中错把一个和关系当成了或关系，导致死循环，耗掉不少时间，甚至都怀疑是vim本身的bug。。。逻辑没学好加上睡眠不足kill my time! 所以目前阶段的代码还是很丑陋的，那几块"if...return
+0...endif"是最让人看不下去的，不过目前还不知道怎么在内嵌function里干掉parent，所以暂时就难看着吧，或者永远就难看着吧，走着瞧吧，看看哪天这段代码会变好看<em>（2010-04-07 18' update: 现在用throw exception的方法达到目的）</em>。</p>
+
+<p>意外发现这样写一个简单实用的小程序不怎么难，而且有点意思，没意思我怎么会坐那儿那么久这么哼哧哼哧地卖命地干呢？要知道我可是一敲起来就没完没了地上的，开始就那么几行，然后变成十几行，几十行，现在上百行了，还好我头脑清醒没继续写下去写个成千上万行，否则我就成诗人了<em>（2010-04-07 18' update: 现在又长了一倍，修改时开始头疼了）</em>。当然啦，不要跟我提数学、算法什么的，即使是function我也会叫它功能而不是函数。。。谢天谢地我知道这是一字多意。</p>
+
+<p>今天有点累了，就这么简单涂几笔，胡扯几句，看得懂看不懂的，都自得其乐就行了，实在觉得看完无聊得慌的可以骂我几句。吱吱声我才知道群众们很满意。因为接下来有许多事都是无聊而又不得不做的。</p>
+
+<p>散了，各自寻开心去吧。 最后，代码在<a href="http://code.google.com/p/chdirectory/">这里</a>。</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2010/04/some-code';
+    var disqus_url = 'http://kanedou.me/2010/04/some-code';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      It's time for an (V)Imperator | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        It's time for an (V)Imperator
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-04-19</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>在<a href="http://awesome.naquadah.org">awesome</a>下使用Firefox或Chrome始终有着不太适应的感觉，其中重要的一点就是这两个浏览器都是鼠标中心化的浏览器，一旦用快捷键切换到浏览器后，我的手必须离开键盘去操作鼠标来接着进行浏览。这样一来，一是我的手需要在鼠标和键盘间不停移动，有点麻烦有点累，二是随之而来的效率降低，重复动作变多。因此我就又想起了之前装了又删，删了又装的Vimperator。</p>
+
+<p><a href="http://vimperator.org">Vimperator</a>是一个将Vim的理念应用在<a href="http://www.mozilla.com/firefox">Firefox</a>上的插件，它的优秀是源于<a href="http://www.vim.org">Vim</a>的优秀，在这次之前我曾经两次尝试过它，但是都在不久以后放弃了，而这次我却很自然而舒服地使用着，并且将其迅速地调整到适于使用的状态，这都是因为我对Vim的操作及理解已经有了相当程度的增长，并且它与awesome的键盘操作概念相当契合一致的缘故。</p>
+
+<p><a href="http://www.flickr.com/photos/kols/4531277806/"><img src="http://farm5.static.flickr.com/4054/4531277806_bed1823d23.jpg" alt="vimperator" /></a></p>
+
+<p>如果让使用过Vim的人来使用Vimperator，则会觉得很方便快捷，只要稍许看一下帮助文件，了解一下如何打开新链接，并map一些常用的功能到快捷键上，一个适于使用且纯键盘的浏览器就诞生了。而对于从未使用过Vim的同学来说，这个插件也提供了相当丰富的帮助文档，只要有少许耐心，应该也很快就能上手。在这我贴出我的.vimperatorrc文件以供做一个参考，当然，内容还相当少：</p>
+
+<div class="highlight"><pre><code class="vim"><span class="k">set</span> <span class="k">go</span><span class="p">=</span><span class="k">b</span> <span class="c">&quot;图形界面只保留底部滚动条，防止页面过宽而不知道</span>
+<span class="k">set</span> focuscontent <span class="c">&quot;新页面不自动聚焦到输入框，方便浏览</span>
+<span class="k">set</span> <span class="nb">showtabline</span><span class="p">=</span><span class="m">0</span> <span class="c">&quot;不显示tab栏，用插件显示到底下statusline了</span>
+<span class="k">colorscheme</span> myzenburn <span class="c">&quot;设定colorscheme</span>
+
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="nb">sc</span> :sbclose<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;关闭侧边栏</span>
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">sm</span> :sidebar SimilarWeb<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;侧边栏打开similarweb插件</span>
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">bm</span> :sidebar Bookmarks<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;侧边栏打开书签</span>
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="nb">rl</span> :sidebar Read It Later<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;侧边栏打开Read it later插件</span>
+
+<span class="c">&quot;在gmail和gr里自动屏蔽vimperator快捷键</span>
+<span class="p">:</span>autocmd LocationChange .* <span class="nb">js</span> modes.passAllKeys <span class="p">=</span> <span class="sr">/mail.google.com/</span>.test<span class="p">(</span>buffer.URL<span class="p">)</span>
+<span class="p">:</span>autocmd LocationChange .* <span class="nb">js</span> modes.passAllKeys <span class="p">=</span> <span class="sr">/www.google.com/</span>reader/.test<span class="p">(</span>buffer.URL<span class="p">)</span>
+<span class="c">&quot;:autocmd LocationChange mail.google.com :set editor=gvim -f -c &#39;set ft=mail&#39;&lt;cr&gt;</span>
+</code></pre></div>
+
+
+<p>插件方面我装了<a href="http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/maine_coon.js">隐藏command-line</a>（依赖<a href="http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js">这个脚本</a>），<a href="http://code.google.com/p/vimperator-labs/issues/detail?id=262&amp;colspec=ID%20Summary%20Project%20Type%20Status%20Priority%20Stars%20Owner">goo.gl短网址生成</a>以及<a href="http://code.google.com/p/vimperator-labs/issues/detail?id=128&amp;colspec=ID%20Summary%20Project%20Type%20Status%20Priority%20Stars%20Owner">buftab</a>（将tab放到statusline上）三个，colorscheme则是<a href="http://code.google.com/p/vimperator-labs/issues/detail?id=142&amp;q=colorscheme&amp;colspec=ID%20Summary%20Project%20Type%20Status%20Priority%20Stars%20Owner">myzenburn</a>，在配置文件里也看的到。另外还有<a href="http://vimperator-labs.googlecode.com/hg/vimperator/contrib/vim/syntax/vimperator.vim">vimperator.vim</a>，用来在vim中高亮.vimperatorrc语法。</p>
+
+<p>经过这样的初步设置调整增强后，Vimperator已经基本让我满意了，在无鼠标的环境下有一定的可用性，推荐喜欢Vim和喜欢awesome的人来尝试。</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2010/04/its-time-for-an-v-imperator';
+    var disqus_url = 'http://kanedou.me/2010/04/its-time-for-an-v-imperator';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

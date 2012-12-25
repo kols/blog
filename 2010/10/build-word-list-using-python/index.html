@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      用 Python 建英语单词表 | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        用 Python 建英语单词表
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-10-31</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>今天受到 dofine
+同学<a href="http://blog.dofine.info/2010/10/use-org-mode-to-recite-words.html">这篇文章</a>
+的启发，想到也可以用相同的办法（Org-Mode 的 Checkbox）来背平时用
+<a href="http://stardict.sourceforge.net/">Stardict</a> 记下的陌生单词，于是写了一个
+<a href="http://python.org">Python</a> 脚本来将单词整理起来，过程中使用了 Dict.CN 的
+<a href="http://dict.cn/ws.php?q=word">API接口</a> 获取单词的音标，释义以及例句。效果看图：</p>
+
+<p><a href="http://pic.yupoo.com/kols/AAxA5L5B/11io9J.png" title="owlb1"><img src="http://pic.yupoo.com/kols/AAxA5L5B/medium.jpg" alt="image" /></a></p>
+
+<!-- more -->
+
+
+<p>输入源：</p>
+
+<pre><code>delineate
+parity
+heterogeneous
+deterministic
+heterogeneous,
+Intersect
+impede
+</code></pre>
+
+<p>脚本文件这里找：<a href="http://github.com/kols/util_scripts/blob/master/owlb.py">owlb.py</a>
+，用法为输入一个纯文本单词文件（格式如上：一个单词一行），输出相应 <code>.org</code> 文件，
+具体请看 <code>python owlb.py --help</code>。</p>
+
+<p><em>2010/11/05 Updated：</em>现在脚本可以在原有单词列表上附加新单词，不会重复，只要将原列表作为输出文件即可。</p>
+
+<p><em>2011/03/17 Updated：</em>重写后，现在的运行速度提高至原版的十倍。</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2010/10/build-word-list-using-python';
+    var disqus_url = 'http://kanedou.me/2010/10/build-word-list-using-python';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        <div class="blog-index">
+  
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2012/07/introducing-python-scrapy-part-i">使用 scrapy （Part I）</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2012-07-18</time>
+      <span class="categories">
+        
+        <em class="category">#python</em>
+        
+        <em class="category">#scrape</em>
+        
+        <em class="category">#crawl</em>
+        
+        <em class="category">#scrapy</em>
+        
+        <em class="category">#twisted</em>
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p><a href="http://scrapy.org">scrapy</a> 是一个高级的网页内容抓取工具，主要用来自动化访问网
+页并程序化提取其中对用户有用的内容。scrapy 构建于流行的 python 异步框架
+<a href="http://twistedmatrix.com">twisted</a> 之上，利用该框架的特点达到抓取的高效率，但
+其面向用户的接口则是完全经过封装并与普通 python 代码写法并无二致的，因此不熟悉
+twisted 的用户也不用担心。</p>
+
+<!-- more -->
+
+
+<h2>安装</h2>
+
+<p>由于 scrapy 是一个 python package，所以先安装 virtualenv 及 pip：</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>sudo apt-get install virtualenv python-pip
+</code></pre></div>
+
+
+<p>接着安装 scrapy：</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>virtualenv --no-site-packages scrapy
+<span class="nv">$ </span><span class="nb">source</span> ./scrapy/bin/activate
+<span class="nv">$ </span>pip install scrapy
+</code></pre></div>
+
+
+<h2>使用</h2>
+
+<p>scrapy 提供的各种工具能大量简化实际抓取时的代码量，同时其对抓取过程的抽象化也很
+到位，方便用户对其控制的同时也提供了相当的自动化特性。</p>
+
+<p>这里就用罗森的官方网站（http://www.lawson.com.cn/shops）为例，说明一下如何使用
+scrapy。示例的结果是得到一份罗森在上海的所有便利店的清单。</p>
+
+<h3>新建 Project</h3>
+
+<p>首先用 scrapy 新建一个 project：</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>scrapy startproject lawson
+</code></pre></div>
+
+
+<p>熟悉一下目录结构：</p>
+
+<div class="highlight"><pre><code class="text">lawson
+├── lawson
+│   ├── __init__.py
+│   ├── items.py
+│   ├── pipelines.py
+│   ├── settings.py
+│   └── spiders
+│       └── __init__.py
+└── scrapy.cfg
+</code></pre></div>
+
+
+<ul>
+<li><code>items.py</code> 定义抓取结果中单个项所需要包含的所有内容，比如便利店的地址、
+分店名称等。</li>
+<li><code>pipelines.py</code> 定义如何对抓取到的内容进行再处理，例如输出文件、写入数据库等。</li>
+<li><code>settings.py</code> 是 scrapy 的设置文件，可对其行为进行调整。</li>
+<li><code>spiders</code> 目录下存放写好的 spider，也即是实际抓取逻辑。</li>
+<li><code>scrapy.cfg</code> 是整个项目的设置，主要用于部署 scrapyd 服务，本文不会涉及。</li>
+</ul>
+
+
+<h3>第一个 spider</h3>
+
+<p>scrapy 中最为重要的部分就是
+<a href="http://doc.scrapy.org/en/0.14/topics/spiders.html">spider</a>。它包含了
+分析网页与抓取网页数据的具体逻辑，也就是说对网页上任何内容的任何处理都在 spider
+中实现。因此，这是 scrapy 整个框架的核心。</p>
+
+<p>首先定义
+<a href="http://doc.scrapy.org/en/0.14/topics/items.html#module-scrapy.item">Item</a>：</p>
+
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.item</span> <span class="kn">import</span> <span class="n">Item</span><span class="p">,</span> <span class="n">Field</span>
+
+
+<span class="k">class</span> <span class="nc">ConvStore</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">branch</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">address</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">city</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">district</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">serializer</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">latitude</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">serializer</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>这里定义了一个便利店（<code>ConvStore</code>）所应包含的内容（
+<a href="http://doc.scrapy.org/en/0.14/topics/items.html#item-fields">Field</a> ），会在
+spider 中用到，用来承载其抓取下来的实际数据。</p>
+
+<p>现在来看 spider：</p>
+
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
+<span class="kn">from</span> <span class="nn">scrapy.contrib.spiders</span> <span class="kn">import</span> <span class="n">CrawlSpider</span><span class="p">,</span> <span class="n">Rule</span>
+<span class="kn">from</span> <span class="nn">scrapy.selector</span> <span class="kn">import</span> <span class="n">HtmlXPathSelector</span>
+
+<span class="kn">from</span> <span class="nn">lawson.items</span> <span class="kn">import</span> <span class="n">ConvStore</span>
+
+
+<span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">CrawlSpider</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;lawson&#39;</span>
+    <span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;http://www.lawson.com.cn/shops&#39;</span><span class="p">]</span>
+    <span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;lawson.com.cn&#39;</span><span class="p">]</span>
+    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r&#39;list\?area_id=\d+&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">),</span>
+                <span class="n">callback</span><span class="o">=</span><span class="s">&#39;parse_store_list&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
+            <span class="n">store</span> <span class="o">=</span> <span class="n">ConvStore</span><span class="p">()</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">u&#39;罗森&#39;</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">&#39;alias&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">u&#39;Lawson&#39;</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">&#39;branch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">&#39;district&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;link_text&#39;</span><span class="p">]</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">&#39;city&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">u&#39;上海&#39;</span>
+
+            <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
+</code></pre></div>
+
+
+<ul>
+<li>首先可以看到代码很短，整个 <code>LawsonSpider</code> 类只有二十多行，但已经能够为我们抓
+取所有必需的信息。</li>
+<li>scrapy 提供了一些基本类（Base class）让我们去继承，
+<a href="http://doc.scrapy.org/en/0.14/topics/spiders.html#crawlspider"><code>CrawlSpider</code></a>
+就是其中之一。代码中所定义的类变量（Class variable）都是再 scrapy 中有各自作
+用的。
+
+<ul>
+<li><code>name</code> 是该 spider 的名字，scrapy 命令行工具调用 spider 时就用这个名字去找
+到对应的 spider。</li>
+<li><code>start_urls</code> 是 spider 的入口，即是告诉它该从哪个网页开始抓取。</li>
+<li><code>allowed_domains</code> 限定 spider 的抓取活动只能在指定的 domain 中进行。</li>
+</ul>
+</li>
+<li><code>rules</code> 定义了一系列规则用来匹配网页中出现的内容，并根据规则分发至不同的处理
+方法中。这里定义了一个规则是向网页中所有匹配正则表达式 <code>r'list\?area_id=\d+'</code>
+的链接（如果你在浏览器打开初始页面的话会发现这些就是页面下方以上海各个区命名
+的那几个链接）发出请求并将其结果交给 <code>parse_store_list</code> 方法（Method）来处理。</li>
+<li><a href="http://doc.scrapy.org/en/0.14/topics/link-extractors.html#sgmllinkextractor"><code>SgmlLinkExtractor</code></a>
+是 scrapy 提供的连接提取器，它的用途就是，呃，提取链接。
+
+<ul>
+<li><code>allow</code> 参数是正则表达式，网页中匹配的链接会被抓取。</li>
+<li><code>tags</code> 指定从哪些标签抓取链接，默认 <code>['a', 'area']</code>（通过分析网页
+这里不能包含 <code>area</code>，故手动指定。</li>
+</ul>
+</li>
+<li><code>parse_store_list</code> 方法定义了如何抓取特定网页中的数据
+
+<ul>
+<li><a href="http://doc.scrapy.org/en/0.14/topics/selectors.html#scrapy.selector.HtmlXPathSelector"><code>HtmlXPathSelector</code></a>
+是一个选择器，使用它能方便地定位到网页中的某个位置并抓取其中内容。</li>
+</ul>
+</li>
+</ul>
+
+
+<h3><code>CrawlSpider</code></h3>
+
+<p>这个类是整个抓取逻辑的基础，他的工作流程如下：</p>
+
+<ol>
+<li>若有 <code>start_urls</code>，则从这些 URL 开始抓取，若没有，则执行 <code>start_requests</code> 方
+法（用户须定义），并请求该方法返回的 <code>Request</code> 对象，并从这些请求结果中开始
+抓取。</li>
+<li>所有网页请求返回的 <code>Response</code> 默认交给 <code>parse</code> 方法处理。
+
+<ul>
+<li><code>parse</code> 方法在 <code>CrawlSpider</code> 的默认实现是用已定义的 <code>rules</code> 对获得的网页内
+容进行匹配并进行由 <code>Rule</code> 所指定的进一步处理（即交给 <code>callback</code> 参数所指定
+的 <code>callable</code> 去处理）。</li>
+<li>若不指定 <code>callback</code>, <code>Rule</code> 的默认处理是对匹配的网址发起请求，并再次交给
+<code>parse</code>。</li>
+</ul>
+</li>
+<li>任何方法中返回的 Item 实例（如示例中的 <code>ConvStore</code>）都会被作为有效数据保存
+（输出文件等），再处理（
+<a href="http://doc.scrapy.org/en/0.14/topics/item-pipeline.html">Pipeline</a>）。</li>
+</ol>
+
+
+<h3><code>HtmlXPathSelector</code></h3>
+
+<p>这是一个通过 <a href="http://www.w3schools.com/xpath/default.asp">XPath</a> 对 HTML 页面进
+行结构化定位和内容读取的工具。scrapy 使用它定位到网页中用户所需要的数据并进行抓
+取。</p>
+
+<div class="highlight"><pre><code class="python"><span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
+        <span class="o">...</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+        <span class="o">...</span>
+</code></pre></div>
+
+
+<ul>
+<li><code>HtmlXPathSelector</code> 需要一个 Response 对象来实例化。</li>
+<li><code>//div[@class="ShopList"]/table/tr</code> 选择了所有包含罗森门店信息的 <code>tr</code> 标签。</li>
+<li><code>s.select('th/p/text()').extract()</code> 在之前的选择基础上继续对其子标签做选择，
+这里就确实得选择到了分店名。<code>extract()</code> 则将该标签的文本数据读取出来。</li>
+<li><code>HtmlXPathSelector</code> 还有正则表达式接口，后文会提到。</li>
+</ul>
+
+
+<h3>Field, Item 及 Item Loader</h3>
+
+<p>Field 仅仅是一个 <code>dict</code> 的 wrapper 类，因此使用方法与 <code>dict</code> 完全一样，在
+scrapy 中它负责声明单个 Item 的字段及该字段的各种行为（如序列化方法
+<code>serializer</code>）。</p>
+
+<p>Item 用 Field 定义了单个有效数据的具体字段，而实际中则是主要有两种方法写入
+数据：</p>
+
+<ol>
+<li>使用其类似 <code>dict</code> 的接口进行数据的写入和读取，<code>key</code> 为字段名。</li>
+<li>使用 <a href="http://doc.scrapy.org/en/0.14/topics/loaders.html">Item Loader</a>。</li>
+</ol>
+
+
+<p><code>dict</code> 接口的用法如上所示很简单，这里说一下 Item Loader。</p>
+
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.contrib.loader</span> <span class="kn">import</span> <span class="n">ItemLoader</span>
+<span class="kn">from</span> <span class="nn">scrapy.contrib.loader.processor</span> <span class="kn">import</span> <span class="n">Compose</span>
+
+<span class="kn">from</span> <span class="nn">lawson.items</span> <span class="kn">import</span> <span class="n">ConvStore</span>
+
+
+<span class="k">class</span> <span class="nc">StoreLoader</span><span class="p">(</span><span class="n">ItemLoader</span><span class="p">):</span>
+    <span class="n">default_output_processor</span> <span class="o">=</span> <span class="n">Compose</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">unicode</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">branch_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">yield</span> <span class="n">v</span> <span class="o">+</span> <span class="s">u&#39;店&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">u&#39;店&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
+
+
+<span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">CrawlSpider</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
+            <span class="n">store</span> <span class="o">=</span> <span class="n">StoreLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">u&#39;罗森&#39;</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;alias&#39;</span><span class="p">,</span> <span class="s">u&#39;Lawson&#39;</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;district&#39;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;link_text&#39;</span><span class="p">])</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;city&#39;</span><span class="p">,</span> <span class="s">u&#39;上海&#39;</span><span class="p">)</span>
+
+            <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>Item Loader 的主要作用是对抓取数据的各个字段进行特殊处理，在这里我们定义了一个
+<code>StoreLoader</code> 类继承（Inherit）自 <code>ItemLoader</code>：</p>
+
+<ul>
+<li><code>default_output_processor</code> 定义默认的输出处理器，这里我们对抓取的数据值进行
+strip 操作。</li>
+<li><code>branch_in</code> 方法是对 <code>branch</code> 字段的特殊处理，他发生在输入的时候，也就是刚抓
+取到数据之后。这里的处理是为没有<code>店</code>这个字的分店名补上这个字。</li>
+<li><code>&lt;field&gt;_in</code> 和 <code>&lt;field&gt;_out</code> 会各对指定字段做一次处理，前者是在刚抓取到数据
+时，后者是在最终输出之前，用户根据需要定义相应方法。
+
+<ul>
+<li>scrapy 有一些 <a href="http://doc.scrapy.org/en/0.14/topics/loaders.html#module-scrapy.contrib.loader.processor">built-in processor</a>
+可以直接使用，进行一些通用处理。</li>
+</ul>
+</li>
+<li><code>add_value</code> 将值赋予相应字段，很好理解。</li>
+<li><code>load_item</code> 返回该条填充过数据的 Item。</li>
+</ul>
+
+
+<p>使用 Item Loader 的好处显而易见，我们有一个统一的地方对所有数据字段进行处理，不
+用将其混入抓取逻辑，使整个流程分工明确。</p>
+
+<p>另一个常用的 Item Loader 是 <code>XPathItemLoader</code>，显然这个版本利用了 XPath：</p>
+
+<div class="highlight"><pre><code class="python"><span class="n">store</span> <span class="o">=</span> <span class="n">XPathItemLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+<span class="n">store</span><span class="o">.</span><span class="n">add_xpath</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr[2]/th/p/text()&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>它将字段与 XPath 表达式关联起来，直接完成定位、读取和写入数据的操作，很方便。</p>
+
+<h3>加上经纬度</h3>
+
+<p>经纬度对于定位一个地点是很有用的，通过电子地图能够精确地定位至相关地点。我发现
+罗森网站提供了这个信息，但它并未明文显示，而是需要通过其所链接到的百度地图的页
+面中去抓取下来，听起来很麻烦，但实际却很简单。</p>
+
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urljoin</span>
+
+<span class="kn">from</span> <span class="nn">scrapy.contrib.loader</span> <span class="kn">import</span> <span class="n">XPathItemLoader</span>
+<span class="kn">from</span> <span class="nn">scrapy.http</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">scrapy.selector</span> <span class="kn">import</span> <span class="n">HtmlXPathSelector</span>
+<span class="kn">from</span> <span class="nn">scrapy.utils.response</span> <span class="kn">import</span> <span class="n">get_base_url</span>
+
+<span class="kn">from</span> <span class="nn">poi_scrape.items</span> <span class="kn">import</span> <span class="n">ConvStore</span>
+
+
+<span class="k">class</span> <span class="nc">StoreLoader</span><span class="p">(</span><span class="n">XPathItemLoader</span><span class="p">):</span>
+    <span class="o">...</span>
+
+
+<span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">BasePoiSpider</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">parse_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span>
+
+        <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">re</span><span class="p">(</span><span class="s">r&#39;(\d+\.\d+),(\d+\.\d+)&#39;</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;latitude&#39;</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;longitude&#39;</span><span class="p">,</span> <span class="n">lng</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="o">...</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
+            <span class="n">store</span> <span class="o">=</span> <span class="n">StoreLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+            <span class="o">...</span>
+
+            <span class="n">map_rel_url</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/a/@rel&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">map_rel_url</span><span class="p">:</span>
+                <span class="n">map_url</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">get_base_url</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="n">map_rel_url</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">req</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">map_url</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_geo</span><span class="p">)</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span>
+                <span class="k">yield</span> <span class="n">req</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>这里为 <code>LawsonSpider</code> 新增了一个方法 <code>parse_geo</code>，同时改写了
+<code>parse_store_list</code>。</p>
+
+<ul>
+<li>在 <code>parse_store_list</code> 的循环中我抓取每个店的 <code>tr</code> 标签中的 <code>td/a/@rel</code> 属性
+（Attribute）（这里 <code>@rel</code> 表示 <code>a</code> 标签的 <code>rel</code> 属性），若有这一属性则对这个
+地图的链接发起请求，即 <code>yield req</code>。
+
+<ul>
+<li>在 scrapy 中，spider 类中的方法若返回 Request 实例则 scrapy 会自动对该
+Request 包含的 URL 发出请求，并将其返回的结果封装为 Response 后交给
+<code>callback</code> 参数中指定的方法处理，若未指定 <code>callback</code>，则交给 <code>parse</code> 方法处
+理。</li>
+</ul>
+</li>
+<li><code>req.meta['store'] = store</code>，每个 Request 有一个预定义的 <code>meta</code> 属性（<code>dict</code>
+），保存在其中的值在其对应的 Response 中可以再次取出：
+<code>store = response.meta['store']</code>。</li>
+<li><code>hxs.re(r'(\d+\.\d+),(\d+\.\d+)')</code> 使用了 <code>HtmlXPathSelector</code> 的正则表达式接
+口直接从网页中通过正则表达式匹配抓取数据。</li>
+</ul>
+
+
+<h3>完整 spider 代码</h3>
+
+<p><code>items.py</code> 没有改动，与上文中的一致。</p>
+
+<div class="highlight"><pre><code class="python"><span class="c"># vim: fileencoding=utf-8</span>
+<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urljoin</span>
+
+<span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
+<span class="kn">from</span> <span class="nn">scrapy.contrib.loader</span> <span class="kn">import</span> <span class="n">XPathItemLoader</span>
+<span class="kn">from</span> <span class="nn">scrapy.contrib.loader.processor</span> <span class="kn">import</span> <span class="n">Compose</span>
+<span class="kn">from</span> <span class="nn">scrapy.contrib.spiders</span> <span class="kn">import</span> <span class="n">CrawlSpider</span><span class="p">,</span> <span class="n">Rule</span>
+<span class="kn">from</span> <span class="nn">scrapy.http</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">scrapy.selector</span> <span class="kn">import</span> <span class="n">HtmlXPathSelector</span>
+<span class="kn">from</span> <span class="nn">scrapy.utils.response</span> <span class="kn">import</span> <span class="n">get_base_url</span>
+
+<span class="kn">from</span> <span class="nn">lawson.items</span> <span class="kn">import</span> <span class="n">ConvStore</span>
+
+
+<span class="k">class</span> <span class="nc">StoreLoader</span><span class="p">(</span><span class="n">XPathItemLoader</span><span class="p">):</span>
+    <span class="n">default_output_processor</span> <span class="o">=</span> <span class="n">Compose</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">unicode</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">branch_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">yield</span> <span class="n">v</span> <span class="o">+</span> <span class="s">u&#39;店&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">u&#39;店&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
+
+
+<span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">CrawlSpider</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;lawson&#39;</span>
+    <span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;http://www.lawson.com.cn/shops&#39;</span><span class="p">]</span>
+    <span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;lawson.com.cn&#39;</span><span class="p">]</span>
+    <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r&#39;list\?area_id=\d+&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">),</span>
+                <span class="n">callback</span><span class="o">=</span><span class="s">&#39;parse_store_list&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span>
+
+        <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">re</span><span class="p">(</span><span class="s">r&#39;(\d+\.\d+),(\d+\.\d+)&#39;</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;latitude&#39;</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;longitude&#39;</span><span class="p">,</span> <span class="n">lng</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
+            <span class="n">store</span> <span class="o">=</span> <span class="n">StoreLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">u&#39;罗森&#39;</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;alias&#39;</span><span class="p">,</span> <span class="s">u&#39;Lawson&#39;</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;district&#39;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;link_text&#39;</span><span class="p">])</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;city&#39;</span><span class="p">,</span> <span class="s">u&#39;上海&#39;</span><span class="p">)</span>
+
+            <span class="n">map_rel_url</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/a/@rel&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">map_rel_url</span><span class="p">:</span>
+                <span class="n">map_url</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">get_base_url</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="n">map_rel_url</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">req</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">map_url</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_geo</span><span class="p">)</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span>
+                <span class="k">yield</span> <span class="n">req</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
+</code></pre></div>
+
+
+<h3>scrapy 命令行工具</h3>
+
+<p>scrapy 提供了一些命令行工具
+（<a href="http://doc.scrapy.org/en/0.14/topics/commands.html">Command line tool</a>），之
+前创建 Project 的时候用到的 <code>startproject</code> 就是其中之一。而除了这个之外，其他工
+具也各自提供了相当有用的功能。</p>
+
+<div class="highlight"><pre><code class="text">$ scrapy
+Scrapy 0.14.4 - project: lawson
+
+Usage:
+  scrapy &lt;command&gt; [options] [args]
+
+Available commands:
+  crawl         Start crawling from a spider or URL
+  deploy        Deploy project in Scrapyd target
+  edit          Edit spider
+  fetch         Fetch a URL using the Scrapy downloader
+  genspider     Generate new spider using pre-defined templates
+  list          List available spiders
+  parse         Parse URL (using its spider) and print the results
+  runspider     Run a self-contained spider (without creating a project)
+  server        Start Scrapyd server for this project
+  settings      Get settings values
+  shell         Interactive scraping console
+  startproject  Create new project
+  version       Print Scrapy version
+  view          Open URL in browser, as seen by Scrapy
+
+Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
+</code></pre></div>
+
+
+<p>这里仅挑出部分来讲。</p>
+
+<h4><code>shell</code></h4>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>scrapy shell <span class="s1">&#39;http://www.lawson.com.cn/shops&#39;</span>
+</code></pre></div>
+
+
+<p>运行后会进入 Python Interpreter，在这里我们能进行各种试验，配合
+<a href="http://doc.scrapy.org/en/0.14/topics/firebug.html">Firebug</a> 之类的工具，为程序
+构建一个原型：</p>
+
+<ul>
+<li>抓取各区分店列表链接，同时演示 <code>SgmlLInkExtractor</code> 用法：</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r&#39;list\?area_id=\d+&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract_links</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+<span class="p">[</span><span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=1&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u&#39;</span><span class="se">\u957f\u5b81\u533a</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+ <span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=2&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u&#39;</span><span class="se">\u5f90\u6c47\u533a</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+ <span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=3&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u&#39;</span><span class="se">\u9759\u5b89\u533a</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+ <span class="o">...</span>
+</code></pre></div>
+
+
+<ul>
+<li>抓取分店列表，<code>fetch</code> 用来载入新的 URL：</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">fetch</span><span class="p">(</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=1&#39;</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&lt;tr&gt;&lt;th scope=&quot;row&quot; class=&quot;linetop&quot;&gt;</span><span class="se">\n\t\t\t</span><span class="s">&#39;</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&lt;tr&gt;&lt;th scope=&quot;row&quot; class=&quot;linetop&quot;&gt;</span><span class="se">\n\t\t\t</span><span class="s">&#39;</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&lt;tr&gt;&lt;th scope=&quot;row&quot; class=&quot;linetop&quot;&gt;</span><span class="se">\n\t\t\t</span><span class="s">&#39;</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">...</span><span class="p">]</span>
+</code></pre></div>
+
+
+<ul>
+<li>抓取分店名称，演示 <code>HtmlXPathSelector</code> 用法：</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="p">[</span><span class="s">u&#39;</span><span class="se">\n\t\t\t\t\u53e4\u5317\u65b0\u533a\n\t\t\t\t</span><span class="s">&#39;</span><span class="p">]</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">]:</span> <span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s">u&#39;店&#39;</span>
+<span class="err">古北新区店</span>
+</code></pre></div>
+
+
+<p>这是一个相当完善的命令行界面，提供了所有必需的网页分析及抓取工具，十分适合在实
+际写抓取程序前做实验。</p>
+
+<p>而 <code>shell</code> 不仅能从命令行直接调用，还能从程序中调用直接进入以便分析程序做调试：</p>
+
+<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.shell</span> <span class="kn">import</span> <span class="n">inspect_response</span>
+
+
+<span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">BasePoiSpider</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">parse_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">inspect_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="o">...</span>
+</code></pre></div>
+
+
+<p>这样在执行到 <code>parse_geo</code> 时就会掉入 <code>shell</code> 界面，可以做进一步调试。</p>
+
+<h4><code>crawl</code></h4>
+
+<p>真正的抓取就是通过这个命令执行的：</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>scrapy crawl store
+</code></pre></div>
+
+
+
+
+<div class="highlight"><pre><code class="text">2012-07-18 15:14:58+0800 [scrapy] INFO: Scrapy 0.14.4 started (bot: lawson)
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled extensions: FeedExporter, LogStats, TelnetConsole, CloseSpider, WebService, CoreStats, SpiderState
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled downloader middlewares: HttpAuthMiddleware, DownloadTimeoutMiddleware, UserAgentMiddleware, RetryMiddleware, DefaultHeadersMiddleware, RedirectMiddleware, CookiesMiddleware, HttpCompressionMiddleware, ChunkedTransferMiddleware, DownloaderStats
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled spider middlewares: HttpErrorMiddleware, OffsiteMiddleware, RefererMiddleware, UrlLengthMiddleware, DepthMiddleware
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled item pipelines:
+2012-07-18 15:14:58+0800 [lawson] INFO: Spider opened
+2012-07-18 15:14:58+0800 [lawson] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Telnet console listening on 0.0.0.0:6023
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Web service listening on 0.0.0.0:6080
+2012-07-18 15:14:59+0800 [lawson] DEBUG: Crawled (200) &lt;GET http://www.lawson.com.cn/shops&gt; (referer: None)
+2012-07-18 15:14:59+0800 [lawson] DEBUG: Crawled (200) &lt;GET http://www.lawson.com.cn/shops/list?area_id=16&gt; (referer: http://www.lawson.com.cn/shops)
+2012-07-18 15:14:59+0800 [lawson] DEBUG: Scraped from &lt;200 http://www.lawson.com.cn/shops/list?area_id=16&gt;
+    {&#39;address&#39;: u&#39;\u5609\u5b9a\u533a\u5609\u677e\u516c\u8def6128\u53f7&#39;,
+     &#39;alias&#39;: u&#39;Lawson&#39;,
+     &#39;branch&#39;: u&#39;\u540c\u6d4e\u5927\u5b66\u5e97&#39;,
+     &#39;city&#39;: u&#39;\u4e0a\u6d77&#39;,
+     &#39;district&#39;: u&#39;\u5609\u5b9a\u533a&#39;,
+     &#39;name&#39;: u&#39;\u7f57\u68ee&#39;}
+...
+2012-07-18 15:15:01+0800 [lawson] DEBUG: Crawled (200) &lt;GET http://www.lawson.com.cn/shops/199/map&gt; (referer: http://www.lawson.com.cn/shops/list?area_id=12)
+2012-07-18 15:15:01+0800 [lawson] DEBUG: Scraped from &lt;200 http://www.lawson.com.cn/shops/199/map&gt;
+    {&#39;address&#39;: u&#39;\u677e\u6c5f\u533a\u897f\u6797\u5317\u8def1048\u53f7&#39;,
+     &#39;alias&#39;: u&#39;Lawson&#39;,
+     &#39;branch&#39;: u&#39;\u677e\u6c5f\u5987\u5e7c\u4fdd\u5065\u9662\u5e97&#39;,
+     &#39;city&#39;: u&#39;\u4e0a\u6d77&#39;,
+     &#39;district&#39;: u&#39;\u677e\u6c5f\u533a&#39;,
+     &#39;latitude&#39;: u&#39;31.030622&#39;,
+     &#39;longitude&#39;: u&#39;121.225586&#39;,
+     &#39;name&#39;: u&#39;\u7f57\u68ee&#39;}
+...
+2012-07-18 15:15:21+0800 [lawson] INFO: Closing spider (finished)
+2012-07-18 15:15:21+0800 [lawson] INFO: Stored csv feed (320 items) in: lawson_store.csv
+2012-07-18 15:15:21+0800 [lawson] INFO: Dumping spider stats:
+    {&#39;downloader/request_bytes&#39;: 158946,
+     &#39;downloader/request_count&#39;: 309,
+     &#39;downloader/request_method_count/GET&#39;: 309,
+     &#39;downloader/response_bytes&#39;: 1883104,
+     &#39;downloader/response_count&#39;: 309,
+     &#39;downloader/response_status_count/200&#39;: 309,
+     &#39;finish_reason&#39;: &#39;finished&#39;,
+     &#39;finish_time&#39;: datetime.datetime(2012, 7, 18, 7, 15, 21, 905140),
+     &#39;item_scraped_count&#39;: 320,
+     &#39;request_depth_max&#39;: 2,
+     &#39;scheduler/memory_enqueued&#39;: 309,
+     &#39;start_time&#39;: datetime.datetime(2012, 7, 18, 7, 14, 58, 538838)}
+2012-07-18 15:15:21+0800 [lawson] INFO: Spider closed (finished)
+2012-07-18 15:15:21+0800 [scrapy] INFO: Dumping global stats:
+    {}
+</code></pre></div>
+
+
+<p>从最后的报告中可以看到这个 spider 在一分钟内抓取了该网站全部320条数据
+（<code>item_scraped_count</code>）。</p>
+
+<p>若要输出抓取结果到一个文件，则加上参数：</p>
+
+<div class="highlight"><pre><code class="sh">scrapy crawl store -o store.csv -t csv
+</code></pre></div>
+
+
+<p>这样，这篇 scrapy 使用教程的第一部分就结束了。</p>
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2012/06/time-machine-with-netatalk">没有时间胶囊的时间机器</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2012-06-26</time>
+      <span class="categories">
+        
+        <em class="category">#linux</em>
+        
+        <em class="category">#apple</em>
+        
+        <em class="category">#server</em>
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>Mac 有一个功能叫时间机器（Time
+Machine），它能备份你硬盘上的所有数据到另一个硬盘或者是一个叫
+<a href="http://www.apple.com/timecapsule/">时间胶囊（Time Capsule）</a> 的东西上。</p>
+
+<p>时间胶囊很好，但是非常非常贵。而另一个办法则需要在 USB 上一直挂一个硬盘，这很麻
+烦。两个办法都不能让我满意，而备份却是必不可少的。</p>
+
+<p>于是我找到了 <a href="http://netatalk.sourceforge.net/">netatalk</a>。</p>
+
+<p>这是一个跑在 *NIX 机器上的开源 <abbr title="AppleShare File Server">AFP</abbr>
+服务器，它能像 Samba 之于 Windows 一样分享服务器上的文件，也可以将服务器上的一
+个硬盘作为网络硬盘，发挥与时间胶囊相同的作用。要求则是一台 Linux/BSD 服务器。这
+里我以 <a href="http://www.debian.org">Debian</a> 为例说下用法。</p>
+
+<!-- more -->
+
+
+<h2>安装</h2>
+
+<h3>准备源</h3>
+
+<p>要支持 OS X 10.7 Lion 就必须安装 2.2 以上的版本，在 Debian 中这个版本在
+<code>wheezy</code> 的源中，若未启用 <code>wheezy</code> 则将下面两行加入 <code>/etc/apt/sources.list</code></p>
+
+<div class="highlight"><pre><code class="text">deb http://mirrors.163.com/debian/ wheezy main contrib non-free
+deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
+</code></pre></div>
+
+
+<h3>netatalk</h3>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>apt-get update
+<span class="nv">$ </span>apt-get install -t wheezy netatalk/wheezy libgcrypt11/wheezy
+</code></pre></div>
+
+
+<p>装 <code>wheezy</code> 中的 <code>libgcrypt11</code> 是因为 <code>netatalk</code> 打包的一个 bug——它默认依赖的
+这个库的版本不对，会导致 <code>netatalk</code> crash。Miserable, I know。该 bug
+<a href="http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=568601#30">已提交</a>。</p>
+
+<h3>avahi</h3>
+
+<p><code>avahi</code> 实现了 Apple 的 <code>Bonjour</code> 协议，可以让你的服务器直接出现在 Finder 侧边
+栏，并可以让 Time Machine 自动找到对应的网络硬盘，省去每次备份前的手动挂载。</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>apt-get install avahi-daemon
+</code></pre></div>
+
+
+<h2>配置</h2>
+
+<h3>netatalk</h3>
+
+<p>在 <code>/etc/netatalk/AppleVolumes.default</code> 末尾加上</p>
+
+<div class="highlight"><pre><code class="text">&lt;path/to/backup/directory&gt; &quot;TimeMachine on $h&quot; allow:&lt;username&gt; cnidscheme:dbd options:upriv,usedots,tm
+</code></pre></div>
+
+
+<h3>avahi</h3>
+
+<p>新建 <code>/etc/avahi/services/afpd.service</code></p>
+
+<div class="highlight"><pre><code class="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; standalone=&#39;no&#39;?&gt;</span><span class="c">&lt;!--*-nxml-*--&gt;</span>
+<span class="cp">&lt;!DOCTYPE service-group SYSTEM &quot;avahi-service.dtd&quot;&gt;</span>
+<span class="nt">&lt;service-group&gt;</span>
+  <span class="nt">&lt;name</span> <span class="na">replace-wildcards=</span><span class="s">&quot;yes&quot;</span><span class="nt">&gt;</span>%h<span class="nt">&lt;/name&gt;</span>
+  <span class="nt">&lt;service&gt;</span>
+    <span class="nt">&lt;type&gt;</span>_afpovertcp._tcp<span class="nt">&lt;/type&gt;</span>
+    <span class="nt">&lt;port&gt;</span>548<span class="nt">&lt;/port&gt;</span>
+  <span class="nt">&lt;/service&gt;</span>
+  <span class="nt">&lt;service&gt;</span>
+    <span class="nt">&lt;type&gt;</span>_device-info._tcp<span class="nt">&lt;/type&gt;</span>
+    <span class="nt">&lt;port&gt;</span>0<span class="nt">&lt;/port&gt;</span>
+    <span class="nt">&lt;txt-record&gt;</span>model=Xserve<span class="nt">&lt;/txt-record&gt;</span>
+  <span class="nt">&lt;/service&gt;</span>
+<span class="nt">&lt;/service-group&gt;</span>
+</code></pre></div>
+
+
+<h3>Time Machine</h3>
+
+<p>Time Machine 默认不会显示 AFP 服务器上的网络硬盘，（在 Mac 上）改个参数让它显示
+出来</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>defaults write com.apple.systempreferences TMShowUnsupportedNetworkVolumes 1
+</code></pre></div>
+
+
+<h2>启动</h2>
+
+<p>重启 <code>netatalk</code> 和 <code>avahi</code></p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>service netatalk restart
+<span class="nv">$ </span>service avahi-daemon restart
+</code></pre></div>
+
+
+<p>这时候 Finder 中应该会出现服务器的图标，点击挂载（第一次需要，之后只要 <code>avahi</code>
+开着 Time Machine 自己会找到）</p>
+
+<p><img class="plain" src="http://pic.yupoo.com/kols_v/C4pgfYwD/14hgGk.png"
+alt="Finder" /></p>
+
+<p>打开 Time Machine，看到配置好的硬盘，选择即可</p>
+
+<p><img class="plain" src="http://pic.yupoo.com/kols_v/C4pgfQEP/15D4b1.png" alt="Time Machine" /></p>
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2011/07/wordpress-dotcloud">WordPress on dotCloud</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2011-07-01</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p><a href="http://dotcloud.com">dotCloud</a> 是一个平台，或者是一个有人代为管理的服务器。它的主要用途是让人们免费的发布自己的
+Web 应用，并且在其之上省去了管理服务器的工作，也就省去了相当的繁琐，使得发布应用更快速方便，并且使得 Developer
+专注于应用，而不用为发布操太多心。想想那些名字，apache、nginx、php-fpm、uwsgi、SSL
+等等等等，各种各样的各不相同的设置与调试只会让人觉得麻烦、不轻松，虽然这其中也有知识。 然而 dotCloud 的应用发布则相当简单：
+（dotcloud 的 python
+客户端安装及命令行基本使用方法请参考<a href="https://docs.dotcloud.com/">官方文档</a>，很简单。）</p>
+
+<!-- more -->
+
+
+<ol>
+<li><p>新建 namespace。</p>
+
+<pre><code>$ dotcloud create kdblue
+</code></pre></li>
+<li><p>建立 Build File。</p>
+
+<pre><code>dotcloud.yml:
+
+www:
+  approot: blog
+  type: php
+  instances: 3
+db:
+  type: mysql
+</code></pre>
+
+<ul>
+<li><code>www</code> 与 <code>db</code> 为 service 名称。</li>
+<li><code>approot</code> 指定该 service 所在的本地根目录。</li>
+<li><code>type</code> 指定应用类型（语言、服务器）。</li>
+<li><code>instances</code> 设置进程数，若是 php 应用则会启动相应数量的 php-fpm 进程。</li>
+</ul>
+</li>
+<li><p>将设置推送至服务器。</p>
+
+<pre><code>$ dotcloud push kdblue .
+</code></pre></li>
+</ol>
+
+
+<p>这样，一个名为 Build File 的 <code>dotcloud.yml</code> 文件就完成了所有服务器端的设置，简单并且轻量。 接下来的工作就是
+WordPress
+的自身设置，根据<a href="http://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Install">著名的5分钟安装</a>教程教我们的：</p>
+
+<ol>
+<li>搞到 WordPress。</li>
+<li><p>在服务器上搞定数据库设置。</p>
+
+<ol>
+<li><p>首先获取 mysql 数据库密码及地址。</p>
+
+<pre><code>$ dotcloud info kdblue.db
+build_revision: rsync-1309344965.25
+cluster: wolverine
+config:
+    hostname: kdblue-default-blog-db-0
+    mysql_password: tpKsNbSjxXlb7I8DM3RH
+created_at: 1309267100.7312429
+ports:
+-   name: ssh
+    url: tcp://53e93k2c.dotcloud.com:9219
+-   name: mysql
+    url: tcp://53e93k2c.dotcloud.com:9220
+state: running
+type: mysql
+</code></pre></li>
+<li><p>登录并创建 WordPress 用数据库。</p>
+
+<pre><code>$ dotcloud run kdblue.db -- mysql -u root -ptpKsNbSjxXlb7I8DM3RH
+(Below in mysql shell)
+&gt; create user 'dql' identified by 'password';
+&gt; create database wordpress;
+&gt; grant all on wordpress.* to 'dql'@'%'
+  identified by 'password';
+&gt; flush privileges;
+</code></pre></li>
+</ol>
+</li>
+<li><p>重命名 <code>wp-config-sample.php</code> 为 <code>wp-config.php</code>。</p></li>
+<li><p>修改 <code>wp-config.php</code> 中的数据库设置。</p>
+
+<pre><code>define('DB_NAME', 'blog');
+define('DB_USER', 'dql');
+define('DB_PASSWORD', 'password');
+define('DB_HOST', '53e93k2c.dotcloud.com:9220');
+</code></pre></li>
+<li><p>确认一下文件树结构。</p>
+
+<pre><code>  myapp/
+  |- dotcloud.yml
+  |_ blog/
+     |_ wordpress/
+         |_ wp-config.php
+         |_ wp-contents/
+         |_ ...
+</code></pre></li>
+<li><p>将设置完毕的 WordPress 推送至服务器并重启进程。</p>
+
+<pre><code>$ dotcloud push kdblue .
+$ dotcloud restart kdblue.www
+</code></pre>
+
+<p>至此 WordPress 便部署成功，访问
+<code>http://53e93k2c.dotcloud.com/wordpress/wp-admin/install</code> 即可完成安装。</p></li>
+<li><p>有域名的可以设置自定义域名，并按说明更改相应 DNS 设置。</p>
+
+<pre><code>$ dotcloud alias add kdblue.www www.example.com
+</code></pre></li>
+</ol>
+
+
+<p>之后是一些有用的 Tip。</p>
+
+<ul>
+<li><p>因为每次 <code>push</code> 都会将服务器端的更改删除（例如安装插件），因此可以使用一个 Post-Install Hook 来避免。</p>
+
+<pre><code>#!/bin/sh
+if [ -d ~/data/wp-content ]
+then
+      rm -rf ~/current/wordpress/wp-content
+else
+      mkdir -p ~/data
+      mv ~/current/wordpress/wp-content ~/data/wp-content
+fi
+ln -s ~/data/wp-content ~/current/wordpress/wp-content
+</code></pre>
+
+<p>将此文件命名为 <code>postinstall</code> 加上执行权限后放在 <code>approot</code> 目录下，这样每次 <code>push</code>
+后之前网页端所做的更改都会保留。（但升级 WordPress 本体似乎必须在本地执行后推送）</p></li>
+<li><p>若要直接在域名处（<code>www.example.com</code>）而非子目录处（<code>www.example.com/wordpress</code>）显示
+WordPress，则需要自定义一项 nginx 设置。</p>
+
+<pre><code>try_files $uri $uri/ /index.php;
+</code></pre>
+
+<p>保存为 <code>nginx.conf</code> 后放在 <code>approot</code> 目录中。</p></li>
+<li><p><a href="http://www.wwwizer.com/">wwwizer</a> 可以免费将 dotcloud 不支持的 naked domain
+301重定向到前缀 www 的子域名，免费且不用注册，直接 A 记录指向其提供的 IP 即可。</p></li>
+</ul>
+
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2010/10/build-word-list-using-python">用 Python 建英语单词表</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-10-31</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>今天受到 dofine
+同学<a href="http://blog.dofine.info/2010/10/use-org-mode-to-recite-words.html">这篇文章</a>
+的启发，想到也可以用相同的办法（Org-Mode 的 Checkbox）来背平时用
+<a href="http://stardict.sourceforge.net/">Stardict</a> 记下的陌生单词，于是写了一个
+<a href="http://python.org">Python</a> 脚本来将单词整理起来，过程中使用了 Dict.CN 的
+<a href="http://dict.cn/ws.php?q=word">API接口</a> 获取单词的音标，释义以及例句。效果看图：</p>
+
+<p><a href="http://pic.yupoo.com/kols/AAxA5L5B/11io9J.png" title="owlb1"><img src="http://pic.yupoo.com/kols/AAxA5L5B/medium.jpg" alt="image" /></a></p>
+
+<!-- more -->
+
+
+<p>输入源：</p>
+
+<pre><code>delineate
+parity
+heterogeneous
+deterministic
+heterogeneous,
+Intersect
+impede
+</code></pre>
+
+<p>脚本文件这里找：<a href="http://github.com/kols/util_scripts/blob/master/owlb.py">owlb.py</a>
+，用法为输入一个纯文本单词文件（格式如上：一个单词一行），输出相应 <code>.org</code> 文件，
+具体请看 <code>python owlb.py --help</code>。</p>
+
+<p><em>2010/11/05 Updated：</em>现在脚本可以在原有单词列表上附加新单词，不会重复，只要将原列表作为输出文件即可。</p>
+
+<p><em>2011/03/17 Updated：</em>重写后，现在的运行速度提高至原版的十倍。</p>
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2010/10/note-with-orgmode">如何用 Org-Mode 做笔记</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-10-24</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p><a href="http://orgmode.org/"><em>Org-Mode</em></a> 是
+<a href="http://www.gnu.org/software/emacs/"><em>Emacs</em></a> 中的一个 Major Mode
+，主要用于做笔记，管理待办事项（TODO list）以及做项目计划（摘自其《用户手册（The Org
+Manual）》）。当然，这是笼统的描述，就像说 <em>Emacs</em>
+只是一个编辑器一般有种别样的幽默，但是今天我正是以其基本的笔记功能作为主题来简略地介绍一下这个有用并且好用的工具。
+ 整篇文章只叙述 <em>Org-Mode</em> 的使用方法及最终效果，不会对各种设置做介绍也不会涉及 <em>Emacs</em>
+的使用，因此，这是一篇给所有人看的文章。</p>
+
+<h3>概览</h3>
+
+<p><a href="http://pic.yupoo.com/kols/AzqxXL3X/IAYB1.png" title="orgmode1"><img src="http://pic.yupoo.com/kols/AzqxXL3X/medium.jpg" alt="image" /></a></p>
+
+<p>这张图是我最近正在学习的 <a href="http://www.python.org"><em>Python</em></a>
+的笔记的截图，整个笔记结构很清晰，最上层的蓝色大字是标题，而后渐次缩小并改变颜色的以 <code>*</code>
+为首的条目均是按层级内嵌的各种小标题，其中缩进最远的则是标题中的具体内容。可以看到，以颜色以及字体大小来凸显笔记的层级区分相当的醒目，并且每一层次的内容均可收起以节省显示空间来专注于当前需要记录或查看的条目，这样的排版使得笔记的可看性也提高许多，而条目尾部的冒号部分则是该条目的标签（Tag），在搜索笔记时这是一个重要的筛选标准，可以快速定位至相关条目。值得注意的是，那些被
+<code>=</code> 包裹的文字在之后导出（Export）为 HTML 或 PDF 格式后会带有相应格式。另外其中 <code>#+BEGIN_SRC python</code>
+至 <code>#+END_SRC</code> 之间的程序源代码在输出时亦会高亮显示语法。而最下面的 Footnotes
+则是脚注，这张图片未显示其效果，具体则是与一般看书时遇到的脚注差不多。
+ 这是对 <em>Org-Mode</em>
+最初的概览，之后的部分则会从笔记的两个重要方面着手，查看其真正的实用性，并简单介绍除记录外其另一个有用的功能，最终你能看到的是一篇完全用
+<em>Org-Mode</em> 记录下的笔记。
+ 而第一步则是我们该如何以最高的效率及最小的麻烦写下一条笔记。</p>
+
+<!-- more -->
+
+
+<h3>捕捉（Capture）</h3>
+
+<p>电脑中笔记的记录，首要的便是方便、快捷，也就是在想写的时候就能马上写，并且不用担心任何例如归类，存档之类的琐碎问题。就像随身的纸笔，拿来即写，写完即成，没有多余的动作。
+ 这里我们要说的就是 <em>Org-Mode</em> 的 org-capture 功能，它的功能就是“捕捉”，而捕捉所需的就是快速、准确、不冗杂。
+org-capture 的操作流程如下：</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzfMqdMs/mNCTL.png" title="orgcap1"><img src="http://pic.yupoo.com/kols/AzfMqdMs/medium.jpg" alt="image" /></a></p>
+
+<p>这张图是命令调出 org-capture 后的第一个介面，
+我需要做的是在画面下方这些我已预设好的模板（Template）之中选择一个来进行记录。</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzfKpnsr/Q062A.png" title="orgcap2"><img src="http://pic.yupoo.com/kols/AzfKpnsr/medium.jpg" alt="image" /></a></p>
+
+<p>选择 pick 模板后便转入这个介面，可以看到，现在按照模板的要求我必须在窗口最底部的 Mini buffer
+中输入这条笔记的主题（Subject），也就是标题，输入完标题后还会需要输入标签，之后光标则会跳至图中 <code>%?</code>
+处来完成最后的笔记正文的输入。另外可以看到的是图中除了我上述所说的三个手动输入部分以外，其他内容均是模板预设的内容，例如笔记创建时间（Created），以及与笔记相关的超链接（Link）。</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzfSUoJF/CRDKe.png" title="orgcap3"><img src="http://pic.yupoo.com/kols/AzfSUoJF/medium.jpg" alt="image" /></a></p>
+
+<p>这就是一条输入完毕的笔记的样子，之后需要做的就是按 <code>Ctrl-c</code> 两次进行保存，当然如果写完后又觉得不需要了则可以
+<code>Ctrl-c Ctrl-k</code> 进行删除，而如果需要将笔记保存至默认文件外的其他文件中，则是按 <code>Ctrl-c Ctrl-w</code> 进行
+<code>refile</code> 。
+ 到此整个笔记记录的流程就结束了，所写下的这条笔记会按照模板的预设被保存到相应的文件中去，在这里则是进入名为 <code>pieces.org</code>
+的文件中去，看下面这张图，它到了文件的最下面。</p>
+
+<p><a href="http://pic.yupoo.com/kols/Azg0yk72/dliE4.png" title="orgcap4"><img src="http://pic.yupoo.com/kols/Azg0yk72/medium.jpg" alt="image" /></a></p>
+
+<p>整个过程中我始终关注要记录的是什么，而模板则解决了其他繁杂重复但仍有记录价值的部分（时间，标签，保存至相应文件等）。我只需要：</p>
+
+<ol>
+<li><strong>快捷键呼出笔记介面</strong></li>
+<li><strong>输入笔记</strong></li>
+<li><strong>快捷键保存</strong></li>
+</ol>
+
+
+<p>其中1、3步需要做的只是敲击几下键盘，第2步则只关注并输入真正重要的内容，因此，整个过程是简单有效的。</p>
+
+<p>然而，高效的记录只是第一步。当笔记完成之后，特别是当笔记条目累积至一个较大的数目的时候，快速找到所需要的内容便成为一个亟须的功能，这也就是文章下一部分的内容——搜索。</p>
+
+<h3>搜索</h3>
+
+<p>搜索之所以重要是因为笔记就是用来记录那些不记下来便会忘记的内容，因此，笔记最重要的一个用处就是查阅，而在相当多的条目中光靠一般的全文搜索是比较难以快速准确地定位到某条特定内容的。
+<em>Org-Mode</em> 则提供了多种搜索方式，先来看其中的几个。</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzirLsss/WkVtx.png" title="orgsearch1"><img src="http://pic.yupoo.com/kols/AzirLsss/medium.jpg" alt="image" /></a></p>
+
+<p>按下 <code>Ctrl-c a</code> 后下半窗口弹出的是 <em>Org-Mode</em> 的日程命令，多数搜索命令也在其中，包括搜索标签、属性（ <code>m</code>
+)，包含关键词的条目（ <code>s</code> ）以及所有关键词的位置（ <code>/</code>
+），这些搜索各适合不同的情况，标签搜索自然是比较快速的定位方法，但是若关键词不在标签中或根本没有使用标签则退而求其次直接搜索关键词，这样得到的结果可能比较多但是因为它支持正则表达式，如果活用应该也能相当方便的找到所需内容。而若需要定位关键词在
+org 文件中所有出现的位置，则 <code>Multi-occur</code>
+是最好的方式。我常用的是前两种，它们都会定位到包含关键词的条目，这样浏览一下标题就基本能够找到需要的内容。
+ 下面看一下实际操作时的介面：</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzirP9xU/DMGg2.png" title="orgsearchmatch1"><img src="http://pic.yupoo.com/kols/AzirP9xU/medium.jpg" alt="image" /></a></p>
+
+<p>这张图片匹配了标签中含有 <code>g1</code> 的条目，通常我要备份手机里内容的时候就会查看那条 <code>g1 backup list</code>
+中记下的内容。另外画面最下方的 Mini buffer 中显示出了该条笔记在哪个文件的哪个标题的哪个小标题中，按 <code>Enter</code> 或 <code>Tab</code>
+都可直接跳至该文件。</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzirNuaY/4L0ez.png" title="orgsearchkw1"><img src="http://pic.yupoo.com/kols/AzirNuaY/medium.jpg" alt="image" /></a></p>
+
+<p>这是全文关键词搜索的结果，可以看到这里显示的条目要比标签搜索的结果多出一些，并且包含了一条明显与 <em>G1</em> 无关的 <em>Python</em>
+笔记，这是因为那条笔记里也包含 <code>g1</code> 这两个字符。同样下方也指名了该笔记的详细位置。</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzirTyfv/FjFFR.png" title="orgsearchmo1"><img src="http://pic.yupoo.com/kols/AzirTyfv/medium.jpg" alt="image" /></a></p>
+
+<p>在这里所有 org 文件中包含 <code>g1</code> 这两个字符的所有位置都被找了出来，包括标题与正文，左侧数字指明其在该文件第几行。</p>
+
+<p> 这就是 <em>Org-Mode</em>
+中的几种主要搜索方式，基本上可以很方便的找到所需的内容，当然搜索的质量也是与记录的质量相挂钩的，例如如果做好了每条笔记的标签工作，则能够在同时使用多个标签作为关键词的情况下迅速匹配出所需的条目。
+ 然而，除了这三个方法以外， <em>Org-Mode</em> 另外还提供了一种名为 <code>Sparse tree</code>
+的搜索方法。这种方法的主要应用是在某个文件中迅速定位至所需内容并且自动隐藏其他的无关内容，比如这样：</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzjvqRh7/16SBK.png" title="orgsparsetree2"><img src="http://pic.yupoo.com/kols/AzjvqRh7/medium.jpg" alt="image" /></a></p>
+
+<p>关键词为 <code>fixme</code>
+，可以看到在图中被高亮了，概览中原本包含相当长的文本内容，现在全被隐藏了，只有与搜索条目相关的内容被显示了出来。从而，这个搜索方法比较适合定位至文件中某些做过标记的地方，当然，若用来搜索需要的内容也同样方便。</p>
+
+<p> 这样就总结了 <em>Org-Mode</em>
+中我所知道的几种搜索方式，它们各有各的适合用途，合理使用就能够快速找到所需的内容。而下面接着的话题则并非笔记中所必须的步骤，然而，它却是
+一个实用的功能，也是 <em>Org-Mode</em> 强大灵活的一个体现，也就是——笔记的导出。</p>
+
+<h3>导出（Export）</h3>
+
+<p>导出功能可以方便的将整理好的 org 文件转换成多种适合发布的文件类型，包括 HTML 、 PDF 、 DocBook
+及其他多种格式，这里我只介绍自己经常用的 HTML 导出。</p>
+
+<p><a href="http://pic.yupoo.com/kols/AzpoHJdl/MoDF6.png" title="orgexport1"><img src="http://pic.yupoo.com/kols/AzpoHJdl/medium.jpg" alt="image" /></a></p>
+
+<p>图中可看到 <em>Org-Mode</em> 的导出功能很庞大，基本涵盖了所有实用的文件格式。</p>
+
+<p> 导出文件并不需要额外的操作，只需要输入导出命令（ <code>Ctrl-c Ctrl-e h</code> ）即可，文件会自动被导出为 HTML
+文件，但其只有基本的 CSS 格式，当然这可以通过简单地自定义相应的 CSS
+文件来解决。另外在对包含源代码的文件进行导出操作时会自动为其高亮显示语法，效果与在 <em>Emacs</em>
+中的语法高亮完全一样，另外其针对源码还可先执行然后导出运行的结果，这对于诠释语法以及到达某些特殊需求有着相当大的作用。除此以外，还可以进行选择性导出，可以仅导出文件中的某些或某一部分内容，或者可以直接生成文件相应的
+HTML 语法以适合在其他程序中发布（如 <em>WordPress</em> ）。</p>
+
+<p> 不过导出只是整个发布环节中的第一步。在得到需要的文件后上传至相应服务器也是一件麻烦事，然而， <em>Org-Mode</em>
+却想到了这一步，提供发布（Publish）的功能，这样便能够自动化地完成从转换格式到上传文件乃至整个项目文件夹的复杂工作，相当便利。细心的人可以发现在上图的最下两行即是发布命令，相应的可以发布单一文件，发布整个项目，或发布所有项目。这些都只需在配置文件中做出相应设置即可，但这里不会涉及。</p>
+
+<p>最后，看一篇笔记输出并发布后的最终效果：<a href="http://kdblue.com/notes/pythonotes.html">Pythonotes</a></p>
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2010/09/gentoo-ssh-proxy-initscript">Gentoo的SSH代理启动脚本</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-09-30</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p><abbr title="Secure Shell">SSH</abbr> 代理是相当方便的翻墙工具，我因为不想用其他多余的工具来使用它，因此，出于方便，自己写了一个用于 Gentoo 下的 Initscript，需要的同学可以把下面这个文件放到 <code>/etc/init.d/sshtunnel</code> 修改 <code>username</code> 和 <code>remotehost</code> 两个变量并新建一个软链 <code>/usr/bin/sshtn</code> 至 <code>/usr/bin/ssh</code>，最后使用 <code>sudo rc-update add sshtunnel default</code> 来启用，默认端口7070。</p>
+
+<!-- more -->
+
+
+
+
+<div class="highlight"><pre><code class="sh"><span class="c">#!/sbin/runscript</span>
+<span class="c">#: Author: Kane Dou &lt;douqilong@gmail.com&gt;</span>
+<span class="c">#: Description: Create ssh tunnel to remote server to establish a socks proxy.</span>
+
+<span class="nv">processname</span><span class="o">=</span><span class="s1">&#39;sshtn&#39;</span> <span class="c"># Symbolic link to /usr/bin/ssh to prevent</span>
+                    <span class="c">#+start-stop-daemon from stoping other ssh connections</span>
+<span class="nv">args</span><span class="o">=</span><span class="s1">&#39;qnTfND&#39;</span> <span class="c"># q for quiet</span>
+                <span class="c">#+n for output to /dev/null</span>
+                <span class="c">#+T for no tty allocation</span>
+                <span class="c">#+f for fork to background</span>
+                <span class="c">#+N for no command execution</span>
+                <span class="c">#+D for dynamic port forwarding</span>
+<span class="nv">username</span><span class="o">=</span><span class="s1">&#39;[ChangeMe]&#39;</span>
+<span class="nv">remotehost</span><span class="o">=</span><span class="s1">&#39;[ChangeMe]&#39;</span>
+<span class="nv">port</span><span class="o">=</span>7070 <span class="c"># Change me maybe</span>
+
+depend<span class="o">()</span> <span class="o">{</span>
+    need net
+    before NetworkManager
+<span class="o">}</span>
+
+start<span class="o">()</span> <span class="o">{</span>
+    ebegin <span class="s2">&quot;Starting SSH Tunnel&quot;</span>
+    start-stop-daemon --start --quiet --name <span class="s2">&quot;$processname&quot;</span>
+    --exec /usr/bin/sshtn -- -<span class="s2">&quot;$args&quot;</span> <span class="s2">&quot;$port&quot;</span> <span class="s2">&quot;$username&quot;</span>@<span class="s2">&quot;$remotehost&quot;</span>
+    eend <span class="nv">$?</span>
+<span class="o">}</span>
+
+stop<span class="o">()</span> <span class="o">{</span>
+    ebegin <span class="s2">&quot;Stopping SSH Tunnel&quot;</span>
+    start-stop-daemon --stop --quiet --name <span class="s2">&quot;$processname&quot;</span>
+    eend <span class="nv">$?</span>
+<span class="o">}</span>
+
+restart<span class="o">()</span> <span class="o">{</span>
+    ebegin <span class="s2">&quot;Will restart SSH Tunnel&quot;</span>
+    svc_stop
+    sleep 3
+    svc_start
+    eend <span class="nv">$?</span>
+<span class="o">}</span>
+
+<span class="c"># vim: set ft=gentoo-init-d ts=3 sw=3 et:</span>
+</code></pre></div>
+
+
+<p>注意，如果服务器会自动切断不活动的 SSH 连接，请在 <code>$HOME/.ssh/config</code> 中加入：</p>
+
+<pre><code>Host [RemoteServerName]
+ServerAliveInterval 60
+</code></pre>
+
+<p>2011/04/28 Update: 又写了个 Debian 版本，<a href="https://github.com/kols/util_scripts/blob/master/ssh_initscript/sshtunnel_debian">这里</a>找</p>
+
+  </section>
+</article>
+
+  
+  <div class="more-archive">
+    
+    <a href="/archive.html"><div class="circle">&nbsp;</div></a>
+    
+  </div>
+</div>
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

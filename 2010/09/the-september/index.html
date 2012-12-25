@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      九月 | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        九月
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-09-27</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>这个月又要过去了，我现在的作文频率已降至历史低点，正是与房价相反，跟股市接轨。</p>
+
+<p>月初干了些什么真的倒还不太记得了，更不要说有人问我六个月前写的那些得得瑟瑟的都是什么了，我更说不上来。这样吧，咱倒着写，可能有助于恢复记忆。</p>
+
+<p>今天除了继续研究Gentoo以外还研究了一下怎么才能让 <em>Dead Rising 2</em> 这个游戏能不这么卡，怎么卡？就是一会儿像幻灯片一会儿像幻灯片那么卡，但他不总是像幻灯片，所以我错以为这是像希望一样的那种东西。于是在本来可以植物大战僵尸的时候，我不得不去研究怎么让僵尸变漂亮变得不那么卡而奋斗，但结果是让人沮丧的，在我一遍遍以开场白的肢解僵尸作为卡还是不卡的测试之后，除了显卡和CPU有烧焦的倾向外一切都没有改变，不论我是超频还是装驱动，又或者寄希望于Win7的最新火星科技。既然这样我就不得不承认，很多东西我必须得对它说不……</p>
+
+<p>这必须是一个bug！但是，噢，说到bug，今天我也遇到了不止一个，虽然不总是跟僵尸有关，但这个bug还是有些用的，对某些人来说。</p>
+
+<!-- more -->
+
+
+<p><a href="https://launchpad.net/notify-osd">notify-osd</a>是Ubuntu的一个桌面通知程序，很漂亮、很优雅，但是gentoo里没有它，于是只能自己编译一个来用，这些不是问题，问题是pidgin，它有个pidgin-libnotify的插件是可以与notify-osd打交道的，然后把聊天信息以那种很漂亮、很优雅的方式通知给我，但是从Gentoo自己的软件库里安装的这个插件是有点小问题以至于notify-osd无法跟它很好沟通，从而本来美观的通知变成了…厄…对话框……这是个大问题。</p>
+
+<p>于是找Google帮忙，很快地在Debian的bugzilla发现了有关这个问题的<a href="http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=549265#40">补丁</a>，打上补丁后重新编译安装pidgin-libnotify。这样一来本来的丑陋对话框就又变成了好看的通知信息。</p>
+
+<p>既然测试成功，并且这个补丁似乎也已经被Debian接受，Gentoo用户应该也可以享受到，于是去到Gentoo的bugzilla提交了<a href="http://bugs.gentoo.org/show_bug.cgi?id=338927">这个建议</a>。
+事情也就是这样。</p>
+
+<p>前不久又去了世博会，是第二次去，依然是热辣的太阳和满头满脸的人群。但这次还算有效率，走遍了欧洲非洲，还轮渡到了浦西，各个国家大大小小的馆去了也有十几个，是和一个每次qq都会发笑脸过来却被我扔炸弹回去仍然百折不挠的家伙一起的。</p>
+
+<p>班级聚会聚不起，寝室聚会也聚不起，每位工作了的都是麻烦一身，养家糊口就是这样忙，因此这个样子应该还算正常。</p>
+
+<p>月中似乎是在新装Gentoo的阶段，各种编译、各种文档消耗了大量时间，但借此机会也认认真真地调整了一回Kernel，于是所谓<em>2.6.34-gentoo-r6-r50e-dt-bb-r1</em>的Kernel就以这样超长（也超囧？）的代号登场了，备份了config，也做好Todo和ChangeLog。对了，顺便一问，有人知道与Thinkpad的Trackpoint相关Kernel选项是哪一个吗？请不吝赐教。</p>
+
+<p>月初则是在写python，主要是同步校内头像到Google Contacts的脚本，起因是看着我的G1通讯录里一个个机器人头像不太爽。基本做通了，可用，接下来就是把事情搞复杂，塞一些外星人也用不到的功能进去，加点彩蛋……过程中不满意的自然是校内那边的数据接口了，只提供Web程序的认证接口而不提供一般的Basic Auth让这个脚本的实现有些…奇怪……</p>
+
+<p>写到这我得说我用的这个方法真是有效，一下子帮我把很多事情都给写出来了，虽然想像中应该没做多少事，但实际则是似乎还有些成果。</p>
+
+<p>继续吧，今天则到此为止。</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2010/09/the-september';
+    var disqus_url = 'http://kanedou.me/2010/09/the-september';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

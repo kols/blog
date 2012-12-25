@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      WordPress on dotCloud | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        WordPress on dotCloud
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2011-07-01</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p><a href="http://dotcloud.com">dotCloud</a> 是一个平台，或者是一个有人代为管理的服务器。它的主要用途是让人们免费的发布自己的
+Web 应用，并且在其之上省去了管理服务器的工作，也就省去了相当的繁琐，使得发布应用更快速方便，并且使得 Developer
+专注于应用，而不用为发布操太多心。想想那些名字，apache、nginx、php-fpm、uwsgi、SSL
+等等等等，各种各样的各不相同的设置与调试只会让人觉得麻烦、不轻松，虽然这其中也有知识。 然而 dotCloud 的应用发布则相当简单：
+（dotcloud 的 python
+客户端安装及命令行基本使用方法请参考<a href="https://docs.dotcloud.com/">官方文档</a>，很简单。）</p>
+
+<!-- more -->
+
+
+<ol>
+<li><p>新建 namespace。</p>
+
+<pre><code>$ dotcloud create kdblue
+</code></pre></li>
+<li><p>建立 Build File。</p>
+
+<pre><code>dotcloud.yml:
+
+www:
+  approot: blog
+  type: php
+  instances: 3
+db:
+  type: mysql
+</code></pre>
+
+<ul>
+<li><code>www</code> 与 <code>db</code> 为 service 名称。</li>
+<li><code>approot</code> 指定该 service 所在的本地根目录。</li>
+<li><code>type</code> 指定应用类型（语言、服务器）。</li>
+<li><code>instances</code> 设置进程数，若是 php 应用则会启动相应数量的 php-fpm 进程。</li>
+</ul>
+</li>
+<li><p>将设置推送至服务器。</p>
+
+<pre><code>$ dotcloud push kdblue .
+</code></pre></li>
+</ol>
+
+
+<p>这样，一个名为 Build File 的 <code>dotcloud.yml</code> 文件就完成了所有服务器端的设置，简单并且轻量。 接下来的工作就是
+WordPress
+的自身设置，根据<a href="http://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Install">著名的5分钟安装</a>教程教我们的：</p>
+
+<ol>
+<li>搞到 WordPress。</li>
+<li><p>在服务器上搞定数据库设置。</p>
+
+<ol>
+<li><p>首先获取 mysql 数据库密码及地址。</p>
+
+<pre><code>$ dotcloud info kdblue.db
+build_revision: rsync-1309344965.25
+cluster: wolverine
+config:
+    hostname: kdblue-default-blog-db-0
+    mysql_password: tpKsNbSjxXlb7I8DM3RH
+created_at: 1309267100.7312429
+ports:
+-   name: ssh
+    url: tcp://53e93k2c.dotcloud.com:9219
+-   name: mysql
+    url: tcp://53e93k2c.dotcloud.com:9220
+state: running
+type: mysql
+</code></pre></li>
+<li><p>登录并创建 WordPress 用数据库。</p>
+
+<pre><code>$ dotcloud run kdblue.db -- mysql -u root -ptpKsNbSjxXlb7I8DM3RH
+(Below in mysql shell)
+&gt; create user 'dql' identified by 'password';
+&gt; create database wordpress;
+&gt; grant all on wordpress.* to 'dql'@'%'
+  identified by 'password';
+&gt; flush privileges;
+</code></pre></li>
+</ol>
+</li>
+<li><p>重命名 <code>wp-config-sample.php</code> 为 <code>wp-config.php</code>。</p></li>
+<li><p>修改 <code>wp-config.php</code> 中的数据库设置。</p>
+
+<pre><code>define('DB_NAME', 'blog');
+define('DB_USER', 'dql');
+define('DB_PASSWORD', 'password');
+define('DB_HOST', '53e93k2c.dotcloud.com:9220');
+</code></pre></li>
+<li><p>确认一下文件树结构。</p>
+
+<pre><code>  myapp/
+  |- dotcloud.yml
+  |_ blog/
+     |_ wordpress/
+         |_ wp-config.php
+         |_ wp-contents/
+         |_ ...
+</code></pre></li>
+<li><p>将设置完毕的 WordPress 推送至服务器并重启进程。</p>
+
+<pre><code>$ dotcloud push kdblue .
+$ dotcloud restart kdblue.www
+</code></pre>
+
+<p>至此 WordPress 便部署成功，访问
+<code>http://53e93k2c.dotcloud.com/wordpress/wp-admin/install</code> 即可完成安装。</p></li>
+<li><p>有域名的可以设置自定义域名，并按说明更改相应 DNS 设置。</p>
+
+<pre><code>$ dotcloud alias add kdblue.www www.example.com
+</code></pre></li>
+</ol>
+
+
+<p>之后是一些有用的 Tip。</p>
+
+<ul>
+<li><p>因为每次 <code>push</code> 都会将服务器端的更改删除（例如安装插件），因此可以使用一个 Post-Install Hook 来避免。</p>
+
+<pre><code>#!/bin/sh
+if [ -d ~/data/wp-content ]
+then
+      rm -rf ~/current/wordpress/wp-content
+else
+      mkdir -p ~/data
+      mv ~/current/wordpress/wp-content ~/data/wp-content
+fi
+ln -s ~/data/wp-content ~/current/wordpress/wp-content
+</code></pre>
+
+<p>将此文件命名为 <code>postinstall</code> 加上执行权限后放在 <code>approot</code> 目录下，这样每次 <code>push</code>
+后之前网页端所做的更改都会保留。（但升级 WordPress 本体似乎必须在本地执行后推送）</p></li>
+<li><p>若要直接在域名处（<code>www.example.com</code>）而非子目录处（<code>www.example.com/wordpress</code>）显示
+WordPress，则需要自定义一项 nginx 设置。</p>
+
+<pre><code>try_files $uri $uri/ /index.php;
+</code></pre>
+
+<p>保存为 <code>nginx.conf</code> 后放在 <code>approot</code> 目录中。</p></li>
+<li><p><a href="http://www.wwwizer.com/">wwwizer</a> 可以免费将 dotcloud 不支持的 naked domain
+301重定向到前缀 www 的子域名，免费且不用注册，直接 A 记录指向其提供的 IP 即可。</p></li>
+</ul>
+
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2011/07/wordpress-dotcloud';
+    var disqus_url = 'http://kanedou.me/2011/07/wordpress-dotcloud';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

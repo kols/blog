@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      使用patch/diff | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        使用patch/diff
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-06-25</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>patch/diff 是一组用来创建补丁与打补丁的程序，它们都是针对plain</p>
+
+<p>text而言的，所谓补丁即是对一个文件的补充。因此，这两个软件的用处基本在于对程序及配置文件加入一些需要的改动而又不用去直接改动文件本身。这样做的好处在于程序和配置文件的维护者只需要发布补丁即可对相应文件做出恰当的改动而不需要再发布整个程序，对于*nix下的纯文本配置文件而言，创建补丁也可以让人明白自己对于一些软件的默认配置做出过哪些改动。由于WordPress主题的修改是很琐碎的，并且主题的每次升级都会将原来配置好的css文件等覆盖，因此我也用patch/diff两程序对所做的修改作记录，以便在出问题或升级后快速地恢复原样。</p>
+
+<h2>diff 用法</h2>
+
+<div class="highlight"><pre><code class="sh"><span class="c"># 基本用法</span>
+<span class="nv">$ </span>diff originalfile updatedfile &gt; some.patch
+
+<span class="c"># 多个文件用法</span>
+<span class="nv">$ </span>diff -ruN original/ updated/ &gt; some.patch
+<span class="c">#  -r 递归对比文件夹内每一个文件。</span>
+<span class="c">#+ -u 使用unified格式输出结果，依据网络上的资料来看使用此格式需要GNU patch，</span>
+<span class="c">#+   与其他patch软件不兼容，但其可生成最小且包含上下文的patch文件。</span>
+<span class="c">#+ -N 将源文件夹内不存在的文件当作空文件处理，patch便会时自动生成此文件。</span>
+<span class="c">#+ 注意源文件与更改过的文件位置不能颠倒</span>
+</code></pre></div>
+
+
+<h2>patch 用法</h2>
+
+<div class="highlight"><pre><code class="sh"><span class="c"># 基本用法</span>
+<span class="nv">$ </span><span class="nb">cd</span> /path/to/file/to/be/patched
+<span class="nv">$ </span>patch <span class="o">[</span>filetobepatched<span class="o">]</span> &lt; some.patch
+<span class="c"># unified格式可省略文件名</span>
+
+<span class="c"># 一些参数</span>
+<span class="nv">$ </span>patch <span class="o">[</span>-pNum<span class="o">]</span> <span class="o">[</span>--dry-run<span class="o">]</span> <span class="o">[</span>-b<span class="o">]</span> &lt; some.patch
+<span class="c">#  -pNum 去掉patch文件中对应文件路径之前的Num个/，例如：</span>
+<span class="c">#+ 原路径为/usr/src/a/b.c，设置-p1后变为usr/src/a/b.c，</span>
+<span class="c">#+ 设置-p3后变为a/b.c，这在为与patch文件中路径不同的文件打补丁时用到。</span>
+<span class="c">#+ --dry-run 模拟运行只输出运行结果但不实际运行，在打补丁前可用此参数测试一下。</span>
+<span class="c">#+ -b[ackup] 备份被patch的文件。</span>
+<span class="c">#+ 另外可以试试--verbose，输出的信息很囧。</span>
+</code></pre></div>
+
+
+
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2010/06/use-patch-diff';
+    var disqus_url = 'http://kanedou.me/2010/06/use-patch-diff';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

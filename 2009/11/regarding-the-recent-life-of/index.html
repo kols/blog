@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      关于最近的生活 | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        关于最近的生活
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2009-11-07</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>突然觉得我又开始了一种从怀疑到确定，确定到怀疑的状态，这种状态曾经出现过，不止一次的，我觉得我已经摆脱了，但，又不只一次的，它又会重新出现。有选择是好事，有太多选择则是对某些人来说的灾难；同样的，有忠告是好事，但有从前后左右不同方向而来的许多忠告，则是一种不大不小正正好好的困惑催化剂。对不成熟的人来说，意识到自己不成熟是很沮丧的，从而我总是想让自己达到某种预期，就算说话，也会在说出一句后马上怀疑自己是否达到预期，也就是，是否显得足够成熟。但这是很痛苦的，没有什么比怀疑自己更痛苦的了，即使愚蠢地盲目相信自己，也是能够让人放松和满足的。</p>
+
+<p>说说最近的生活，开始学习Linux中的一些东西，像rsync，xorg，initramfs。在生成了一个带plymouth的kernel26.img导致无法开机后，又在ubuntu下学会了chroot的一些基础用法，从而成功地救活了arch。并且，也知趣地"hack"了一下kernel26.preset，从而得到一个test.preset。之所以打了引号，是因为只把生成的img改了个名字而已:]。</p>
+
+<p>今天在看rsync的时候发现它的man实在是太长太长了。网上的一篇rsync教程说到了hard link，突然就对linux神奇的文件保存机制感到惊讶。虽然还没开始用rsync备份配置文件，但是我觉得把配置文件保存在dropbox实在是一个很好的主意。</p>
+
+<p>在xorg步入1.7后，我就只能用起kms了，但是，glxgears的帧数却下降的厉害，而不用kms，则一运行startx系统必然黑屏加死翘翘。这种现象应该是叫regression吧？并且，一个似乎已存在很久的bug（在kms加载后出现render error讯息）也在我这里出现了。幸好，开启kms后系统只是间歇性偶尔且随机地freeze，但是我还是得说，还我稳定的xorg！还我稳定的xf86-video-intel！这不得不说是arch的一个弱点，就是无法从官方repo来downgrade package，除非不执行pacman -Scc清空/var/cache/pacman/pkg目录下的旧版package，否则就只能找第三方repo或aur来解决了，但我觉得，要成为一个可以让人信赖并且能拿来作为工作环境的发行版，arch一定要为pacman加入downgrade的功能，以适应各种不同硬件配置的需要。</p>
+
+<p>房子已经基本上弄好了，今天沙发没能搬进门实在有点扫兴。明天给邻居们发糕，这是传统吗？我之前不知道的，所以，又长见识了。折腾了半年的搬家终于就快要结束了，这期间发生了很多，说了很多，也做了不少。我以前写博客很勤，之后几乎几年未写，现在，买了域名，有了自己可以ssh的收费空间后，似乎又一点点，一句句地开始输入了。吉他还能记得几个和弦，虽然有点按不住弦，但还有那么点模样在。半年前接触的ubuntu让我开始重新认识自己对这个世界的认识。我觉得我做什么都渺小，所以只求自己满意。不知新的屋子会给人带来什么，我想至少会是从前没有而我又期待的东西。我年初时说的改变已经实实在在地发生着或发生过了。</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2009/11/regarding-the-recent-life-of';
+    var disqus_url = 'http://kanedou.me/2009/11/regarding-the-recent-life-of';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>

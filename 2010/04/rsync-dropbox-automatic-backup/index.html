@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" />-->
+    <link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+    <script type="text/javascript" src="/vendor/bootstrap/js/bootstrap.js"></script>
+    <title>
+      Rsync, Dropbox与自动备份 | kanedou.me
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        Rsync, Dropbox与自动备份
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-04-25</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>自从在GR中读某人一篇介绍<a href="http://samba.anu.edu.au/rsync/">rsync</a>的文章后（抱歉忘记出处了），就一直对其抱有想试一试的想法，但一直拖到现在，也不得不佩服一下我自己。昨天终于坐下来研究了半天rsync，最后成功将其应用到我的vimwiki的内容发布及备份工作上。不得不感叹这个软件的灵活强大，搭配上cron、tar及dropbox后几乎可以完成任何我所需要的备份工作（主要备份各种文本配置文件）。</p>
+
+<p>关于vimwiki的介绍你可以在本博客上找到，这是一个方便高效率的知识管理工具，为此我也花了点心思将其调整到一个适合使用的状态（例如设置快捷键，写css文件，加入各种语法高亮等）。而这些设置，都是慢慢积累起来的，就像每个vim用户的vimrc文件一样，不是一朝一夕就能配置到完全适合的样子，因此对配置文件的备份就显得相当重要。</p>
+
+<p>而另一个更重要的东西，当然就是我使用vimwiki所写下的各种笔记，这些笔记都是我自己创作的内容，是我在生活、学习过程中实践思考的一些成果，应该说，这些东西——笔记——对于我而言都是相当重要的东西，它就相当于一部更详细的草稿，是自己灵感及经验的记录。如果因为某些意外情况而导致这些文件遗失的话，会是相当让人沮丧苦恼的。</p>
+
+<p>出于这个原因，我开始研究rsync。</p>
+
+<h2>思路</h2>
+
+<p>rsync可以在各个Linux发行版中找到，如果没有找到，也应该可以通过包管理系统找到并自行安装。而Windows下我认为通过<a href="http://www.cygwin.com">Cygwin</a>使用rsync会是一个比较好的方法，但我还未试过。</p>
+
+<p>第一次使用，应该好好看一下"man rsync"，相当长，但并非每个功能都是每个人需要用到的，实际上，在我的情况中，我只使用了大约15个左右的Option，在下面的Script中可以看到。</p>
+
+<p>另外，可以搭配rsync使用的软件是cron，这应该算是Linux的标配软件，它能够以一个用户设定好的固定周期来执行某些命令，当然也可以是脚本文件，这样我们对rsync的备份应用便可以完全自动化，无需人工干预。</p>
+
+<p><a href="https://www.dropbox.com/referrals/NTI4MjMwMDI5">Dropbox</a><em>(2010-05-21 补充：由于众所周知的原因，Dropbox这个优秀的网络服务已经正式享受到了各种鸡鸣狗盗之辈所无法企及的黑名单待遇)</em>早就声名在外了，它是一个个人网络硬盘，可以在不同的机器、系统上同步其存储的内容。说的简单点，你在家中电脑上把一个文件同步到Dropbox后，到办公室电脑上同步后便可以直接使用这个文件，不用另外的U盘拷贝或电邮发送。而这其中所谓的同步，就与一般的复制粘帖操作完全无异。因此，这是一个相当方便的服务，它相当于把网盘的操作简单化、傻瓜化。</p>
+
+<p>至此，我的大致思路应该已经比较明显了。我通过shell script将这三者融合起来，首先将我的数据通过rsync备份（复制）到Dropbox及发布到我的博客，并通过cron使其自动化。</p>
+
+<p>另外上文中提到的tar，则是压缩软件，在用rsync将vimwiki的文件树完全备份到Dropbox及博客之后，我再使用tar将其整个目录打包为一个压缩文件，并通过mutt发送到我的gmail信箱，这样，我就实现了三重备份，即Dropbox、博客及Gmail三方。这样，我的数据应该是比较安全的，除非世界末日，否则这三个地方同时丢失数据的可能应该很小。</p>
+
+<h2>实现</h2>
+
+<div class="highlight"><pre><code class="sh"><span class="c">#!/bin/bash</span>
+
+<span class="c"># 整个脚本的&quot;echo -e&quot;输出的几乎都是debug信息，之后在cron中运行此脚本，debug信息会记录到我所设定的log文件中。</span>
+
+<span class="c"># Variables</span>
+<span class="nv">Time</span><span class="o">=</span><span class="s2">&quot;`date +%Y%m%d_%H%M`&quot;</span>
+<span class="nv">BackupDir</span><span class="o">=</span><span class="s2">&quot;backup/$Time&quot;</span> <span class="c"># 备份目标目录中会被删除（因备份源中此文件被删除或移往别处等）的文件将被一致这个目录</span>
+<span class="nv">Filter</span><span class="o">=</span><span class="s2">&quot;H_vwbf*&quot;</span> <span class="c"># 这两行为过滤选项，详情看man page中FILTER RULE条目</span>
+<span class="nv">Filter1</span><span class="o">=</span><span class="s2">&quot;P_backup/&quot;</span>
+<span class="nv">Source</span><span class="o">=</span><span class="s2">&quot;/data/Documents/vimwiki/&quot;</span> <span class="c"># 这两行为备份源/目标目录</span>
+<span class="nv">Target</span><span class="o">=</span><span class="s2">&quot;/home/kols/Dropbox/backup/vimwiki/&quot;</span>
+<span class="nv">RsOpts</span><span class="o">=</span><span class="s2">&quot;-avzubrKh --filter=$Filter --filter=$Filter1 --write-batch=vwbf --protocol=29 --progress --delete --del --stats --backup-dir=$BackupDir&quot;</span> <span class="c"># 这是rsync的参数，需要花些时间研究你自己要用到的。你可以对照man page来看看我的这些参数各是什么意思</span>
+
+<span class="nb">cd</span> <span class="nv">$HOME</span>
+<span class="c"># Local Rsync Backup</span>
+<span class="nb">echo</span> -e <span class="s2">&quot;********************************n*[`date`]*n********************************n&quot;</span>
+rsync <span class="nv">$RsOpts</span> <span class="nv">$Source</span> <span class="nv">$Target</span>
+<span class="nb">echo</span> -e <span class="s2">&quot;====== Dropbox Backup Completed! ======n&quot;</span>
+
+<span class="c"># Upload rsync batch file to remote host via rsync</span>
+<span class="c">#+这个部分使用了rsync的batch mode功能，因为我在Dropbox和博客上的vimwiki文件目录树相同，</span>
+<span class="c">#+因此在rsync备份前所做的文件一致性验证只需做一次，然后将batch file上传至博客服务器后</span>
+<span class="c">#+在服务器上用batch file中的验证数据进行备份，就可避免重复验证浪费资源。详情仍请参看</span>
+<span class="c">#+man page。</span>
+<span class="nv">Source</span><span class="o">=</span><span class="s2">&quot;/data/backup/rsbatchfile/vwbf*&quot;</span>
+<span class="nv">Target</span><span class="o">=</span><span class="s2">&quot;username@remotehost:path/to/dir&quot;</span>
+<span class="nv">RsOpts</span><span class="o">=</span><span class="s2">&quot;-avz&quot;</span>
+rm -f <span class="nv">$Source</span>
+mv vwbf* /data/backup/rsbatchfile/
+rsync <span class="nv">$RsOpts</span> <span class="nv">$Source</span> <span class="nv">$Target</span>
+<span class="nb">echo</span> -e <span class="s2">&quot;====== Batch File Transfered! ======n&quot;</span>
+
+<span class="c"># Do rsync in batch mode using the batch file received</span>
+ssh yourusername@example.com <span class="s1">&#39;cd backups/rsbatchfile/ &amp;&amp; ./vwbf.sh /path/to/your/backup/dir/&#39;</span>
+<span class="nb">echo</span> -e <span class="s2">&quot;====== Remote Backup Completed! ======n&quot;</span>
+
+<span class="c"># Make tarball backup file</span>
+<span class="nv">TarballName</span><span class="o">=</span><span class="s2">&quot;vw_$Time.tar.gz&quot;</span>
+<span class="nv">TarballDir</span><span class="o">=</span><span class="s2">&quot;/path/to/your/local/backup/dir/&quot;</span>
+<span class="nv">Source</span><span class="o">=</span><span class="s2">&quot;vimwiki/&quot;</span>
+<span class="nb">cd</span> /data/Documents <span class="o">&amp;&amp;</span> tar capsf <span class="nv">$TarballName</span> <span class="nv">$Source</span> <span class="o">&amp;&amp;</span> mv *.tar.gz <span class="nv">$TarballDir</span> <span class="c"># 将整个目录作成压缩文件</span>
+
+<span class="c"># Send tarball to gmail via mutt</span>
+<span class="k">if</span> <span class="o">[</span> -e <span class="s2">&quot;$TarballDir$TarballName&quot;</span> <span class="o">]</span>
+<span class="k">then</span>
+<span class="k">  </span><span class="nb">echo</span> -e <span class="s2">&quot;====== Tarball Created! ======n&quot;</span>
+  mutt -s <span class="s2">&quot;Vimwiki tarball backup&quot;</span> -a <span class="nv">$TarballDir$TarballName</span> -- youremailaddress@gamil.com &lt; /dev/null <span class="c"># 使用mutt发送压缩文件至gmail信箱</span>
+  <span class="nb">echo</span> -e <span class="s2">&quot;====== Tarball Sent! ======n&quot;</span>
+<span class="k">else</span>
+<span class="k">  </span><span class="nb">echo</span> -e <span class="s2">&quot;====== Tarball is Not Successfully Created. Backup Failed! ======n&quot;</span>
+  <span class="nb">exit </span>2
+<span class="k">fi</span>
+</code></pre></div>
+
+
+<p>之后配置cron，这样做：</p>
+
+<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>crontab -e <span class="c"># 编辑本用户的crontab（相当于计划时间表）</span>
+
+<span class="c"># 这里我的这个脚本会在每周三、六晚九点自动执行。</span>
+<span class="c"># min hour dayomon mon dayoweek command</span>
+<span class="c"># run vimwiki backup script(to dropbox, remotehost, gmail) twice a week(Wednesday, Saturday)</span>
+0 21 * * 3,6 /data/shell_scripts/management/vwbk2dbx_rhs_ml.sh &gt;&gt; <span class="nv">$HOME</span>/bklog/vwbk.log <span class="c"># 后面这个就是log文件，每次执行脚本后其debug信息会被append到这个日志文件，便于查错。</span>
+
+<span class="c">#+详细的crontab语法请看：</span>
+<span class="nv">$ </span>man 5 crontab
+</code></pre></div>
+
+
+<h2>补充</h2>
+
+<p>由于rsync在远程备份中默认使用ssh，因此在这个脚本中另一个关键点是配置ssh的key验证，也就是无需输入密码直接登录远程服务器，如果要输入密码，那么这个脚本是无法完成自动化执行的。但这不是本文的要点，且比较容易，故请自行搜索网络资源寻找方法。</p>
+
+<p>这个备份方案可以算作抛砖引玉，你可以将其应用在备份任何文件上，所要做的只是修改一下脚本文件的相应内容。</p>
+
+<p>另，从本文开始之后的文章几乎都会如此排版，此版式的灵感来源于<a href="https://www.kenengba.com">可能吧</a>，在此感谢它的作者们。<em>（2012-02-07 补充：此改动作废）</em></p>
+
+<p>不过我对此配色方案还不是十分地满意，因此，如果谁有更好的色彩搭配（指文章中的heading）请不吝赐教;-)</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2010/04/rsync-dropbox-automatic-backup';
+    var disqus_url = 'http://kanedou.me/2010/04/rsync-dropbox-automatic-backup';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2012 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>
