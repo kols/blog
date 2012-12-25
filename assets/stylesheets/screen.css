@@ -6455,7 +6455,7 @@ article a, footer.contentinfo a {
 /* line 23, ../../compass/sass/screen.scss */
 article a:hover, footer.contentinfo a:hover {
   color: #0088cc;
-  text-shadow: 0 0 1px #0088cc;
+  text-shadow: 0 0 1.5px #0088cc;
 }
 /* line 27, ../../compass/sass/screen.scss */
 article a code, footer.contentinfo a code {
@@ -6545,7 +6545,7 @@ div.container {
 }
 /* line 82, ../../compass/sass/screen.scss */
 div.container > header {
-  font-family: "Droid Serif", serif;
+  font-family: "Georgia", "Droid Serif", serif;
 }
 
 /* line 85, ../../compass/sass/screen.scss */
@@ -6577,7 +6577,7 @@ article section.title + section.meta {
   color: #888888;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=60);
   opacity: 0.6;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* line 106, ../../compass/sass/screen.scss */

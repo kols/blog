@@ -44,7 +44,38 @@
     <section class="title">
       <h1>
         
-        <a href="/2012/07/introducing-python-scrapy-part-i">使用 scrapy （Part I）</a>
+        <a href="/2012/07/you-need-sunshine-boy/">You need sunshine boy</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2012-07-18</time>
+      <span class="categories">
+        
+        <em class="category">#photo</em>
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p><a href="http://www.flickr.com/photos/kols/6209939019/" title="Wind by kols, on Flickr">
+  <img class="oob" src="http://farm7.staticflickr.com/6106/6209939019_45d6b7341b_b.jpg" width="1024" height="683" alt="Wind">
+</a></p>
+
+<p>you do need it (;</p>
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2012/07/introducing-python-scrapy-part-i/">使用 scrapy （Part I）</a>
         
       </h1>
     </section>
@@ -707,7 +738,7 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
     <section class="title">
       <h1>
         
-        <a href="/2012/06/time-machine-with-netatalk">没有时间胶囊的时间机器</a>
+        <a href="/2012/06/time-machine-with-netatalk/">没有时间胶囊的时间机器</a>
         
       </h1>
     </section>
@@ -844,7 +875,7 @@ alt="Finder" /></p>
     <section class="title">
       <h1>
         
-        <a href="/2011/07/wordpress-dotcloud">WordPress on dotCloud</a>
+        <a href="/2011/07/wordpress-dotcloud/">WordPress on dotCloud</a>
         
       </h1>
     </section>
@@ -1009,7 +1040,7 @@ WordPress，则需要自定义一项 nginx 设置。</p>
     <section class="title">
       <h1>
         
-        <a href="/2010/10/build-word-list-using-python">用 Python 建英语单词表</a>
+        <a href="/2010/10/build-word-list-using-python/">用 Python 建英语单词表</a>
         
       </h1>
     </section>
@@ -1063,7 +1094,7 @@ impede
     <section class="title">
       <h1>
         
-        <a href="/2010/10/note-with-orgmode">如何用 Org-Mode 做笔记</a>
+        <a href="/2010/10/note-with-orgmode/">如何用 Org-Mode 做笔记</a>
         
       </h1>
     </section>
@@ -1203,90 +1234,6 @@ HTML 语法以适合在其他程序中发布（如 <em>WordPress</em> ）。</p>
 却想到了这一步，提供发布（Publish）的功能，这样便能够自动化地完成从转换格式到上传文件乃至整个项目文件夹的复杂工作，相当便利。细心的人可以发现在上图的最下两行即是发布命令，相应的可以发布单一文件，发布整个项目，或发布所有项目。这些都只需在配置文件中做出相应设置即可，但这里不会涉及。</p>
 
 <p>最后，看一篇笔记输出并发布后的最终效果：<a href="http://kdblue.com/notes/pythonotes.html">Pythonotes</a></p>
-
-  </section>
-</article>
-
-  
-  
-  
-<article role="article" class="well">
-  <header>
-    <section class="title">
-      <h1>
-        
-        <a href="/2010/09/gentoo-ssh-proxy-initscript">Gentoo的SSH代理启动脚本</a>
-        
-      </h1>
-    </section>
-    <section class="meta">
-      @<time>2010-09-30</time>
-      <span class="categories">
-        
-      </span>
-    </section>
-  </header>
-  <section class="post">
-    <p><abbr title="Secure Shell">SSH</abbr> 代理是相当方便的翻墙工具，我因为不想用其他多余的工具来使用它，因此，出于方便，自己写了一个用于 Gentoo 下的 Initscript，需要的同学可以把下面这个文件放到 <code>/etc/init.d/sshtunnel</code> 修改 <code>username</code> 和 <code>remotehost</code> 两个变量并新建一个软链 <code>/usr/bin/sshtn</code> 至 <code>/usr/bin/ssh</code>，最后使用 <code>sudo rc-update add sshtunnel default</code> 来启用，默认端口7070。</p>
-
-<!-- more -->
-
-
-
-
-<div class="highlight"><pre><code class="sh"><span class="c">#!/sbin/runscript</span>
-<span class="c">#: Author: Kane Dou &lt;douqilong@gmail.com&gt;</span>
-<span class="c">#: Description: Create ssh tunnel to remote server to establish a socks proxy.</span>
-
-<span class="nv">processname</span><span class="o">=</span><span class="s1">&#39;sshtn&#39;</span> <span class="c"># Symbolic link to /usr/bin/ssh to prevent</span>
-                    <span class="c">#+start-stop-daemon from stoping other ssh connections</span>
-<span class="nv">args</span><span class="o">=</span><span class="s1">&#39;qnTfND&#39;</span> <span class="c"># q for quiet</span>
-                <span class="c">#+n for output to /dev/null</span>
-                <span class="c">#+T for no tty allocation</span>
-                <span class="c">#+f for fork to background</span>
-                <span class="c">#+N for no command execution</span>
-                <span class="c">#+D for dynamic port forwarding</span>
-<span class="nv">username</span><span class="o">=</span><span class="s1">&#39;[ChangeMe]&#39;</span>
-<span class="nv">remotehost</span><span class="o">=</span><span class="s1">&#39;[ChangeMe]&#39;</span>
-<span class="nv">port</span><span class="o">=</span>7070 <span class="c"># Change me maybe</span>
-
-depend<span class="o">()</span> <span class="o">{</span>
-    need net
-    before NetworkManager
-<span class="o">}</span>
-
-start<span class="o">()</span> <span class="o">{</span>
-    ebegin <span class="s2">&quot;Starting SSH Tunnel&quot;</span>
-    start-stop-daemon --start --quiet --name <span class="s2">&quot;$processname&quot;</span>
-    --exec /usr/bin/sshtn -- -<span class="s2">&quot;$args&quot;</span> <span class="s2">&quot;$port&quot;</span> <span class="s2">&quot;$username&quot;</span>@<span class="s2">&quot;$remotehost&quot;</span>
-    eend <span class="nv">$?</span>
-<span class="o">}</span>
-
-stop<span class="o">()</span> <span class="o">{</span>
-    ebegin <span class="s2">&quot;Stopping SSH Tunnel&quot;</span>
-    start-stop-daemon --stop --quiet --name <span class="s2">&quot;$processname&quot;</span>
-    eend <span class="nv">$?</span>
-<span class="o">}</span>
-
-restart<span class="o">()</span> <span class="o">{</span>
-    ebegin <span class="s2">&quot;Will restart SSH Tunnel&quot;</span>
-    svc_stop
-    sleep 3
-    svc_start
-    eend <span class="nv">$?</span>
-<span class="o">}</span>
-
-<span class="c"># vim: set ft=gentoo-init-d ts=3 sw=3 et:</span>
-</code></pre></div>
-
-
-<p>注意，如果服务器会自动切断不活动的 SSH 连接，请在 <code>$HOME/.ssh/config</code> 中加入：</p>
-
-<pre><code>Host [RemoteServerName]
-ServerAliveInterval 60
-</code></pre>
-
-<p>2011/04/28 Update: 又写了个 Debian 版本，<a href="https://github.com/kols/util_scripts/blob/master/ssh_initscript/sshtunnel_debian">这里</a>找</p>
 
   </section>
 </article>
