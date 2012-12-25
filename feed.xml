@@ -1,0 +1,1247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>kanedou.me</title>
+    <description></description>
+    <link>http://kanedou.me</link>
+    <atom:link href="http://kanedou.me/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>You need sunshine boy</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://www.flickr.com/photos/kols/6209939019/&quot; title=&quot;Wind by kols, on Flickr&quot;&gt;
+  &lt;img class=&quot;oob&quot; src=&quot;http://farm7.staticflickr.com/6106/6209939019_45d6b7341b_b.jpg&quot; width=&quot;1024&quot; height=&quot;683&quot; alt=&quot;Wind&quot;&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;you do need it (;&lt;/p&gt;
+</description>
+        <pubDate>Wed, 18 Jul 2012 14:41:00 +0800</pubDate>
+        <link>http://kanedou.me/2012/07/you-need-sunshine-boy/</link>
+        <guid isPermaLink="true">http://kanedou.me/2012/07/you-need-sunshine-boy/</guid>
+      </item>
+    
+      <item>
+        <title>使用 scrapy （Part I）</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://scrapy.org&quot;&gt;scrapy&lt;/a&gt; 是一个高级的网页内容抓取工具，主要用来自动化访问网
+页并程序化提取其中对用户有用的内容。scrapy 构建于流行的 python 异步框架
+&lt;a href=&quot;http://twistedmatrix.com&quot;&gt;twisted&lt;/a&gt; 之上，利用该框架的特点达到抓取的高效率，但
+其面向用户的接口则是完全经过封装并与普通 python 代码写法并无二致的，因此不熟悉
+twisted 的用户也不用担心。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+&lt;h2&gt;安装&lt;/h2&gt;
+
+&lt;p&gt;由于 scrapy 是一个 python package，所以先安装 virtualenv 及 pip：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;sudo apt-get install virtualenv python-pip
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;接着安装 scrapy：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;virtualenv --no-site-packages scrapy
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;source&lt;/span&gt; ./scrapy/bin/activate
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;pip install scrapy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;使用&lt;/h2&gt;
+
+&lt;p&gt;scrapy 提供的各种工具能大量简化实际抓取时的代码量，同时其对抓取过程的抽象化也很
+到位，方便用户对其控制的同时也提供了相当的自动化特性。&lt;/p&gt;
+
+&lt;p&gt;这里就用罗森的官方网站（http://www.lawson.com.cn/shops）为例，说明一下如何使用
+scrapy。示例的结果是得到一份罗森在上海的所有便利店的清单。&lt;/p&gt;
+
+&lt;h3&gt;新建 Project&lt;/h3&gt;
+
+&lt;p&gt;首先用 scrapy 新建一个 project：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;scrapy startproject lawson
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;熟悉一下目录结构：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;lawson
+├── lawson
+│   ├── __init__.py
+│   ├── items.py
+│   ├── pipelines.py
+│   ├── settings.py
+│   └── spiders
+│       └── __init__.py
+└── scrapy.cfg
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;items.py&lt;/code&gt; 定义抓取结果中单个项所需要包含的所有内容，比如便利店的地址、
+分店名称等。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pipelines.py&lt;/code&gt; 定义如何对抓取到的内容进行再处理，例如输出文件、写入数据库等。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;settings.py&lt;/code&gt; 是 scrapy 的设置文件，可对其行为进行调整。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;spiders&lt;/code&gt; 目录下存放写好的 spider，也即是实际抓取逻辑。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;scrapy.cfg&lt;/code&gt; 是整个项目的设置，主要用于部署 scrapyd 服务，本文不会涉及。&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;第一个 spider&lt;/h3&gt;
+
+&lt;p&gt;scrapy 中最为重要的部分就是
+&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/spiders.html&quot;&gt;spider&lt;/a&gt;。它包含了
+分析网页与抓取网页数据的具体逻辑，也就是说对网页上任何内容的任何处理都在 spider
+中实现。因此，这是 scrapy 整个框架的核心。&lt;/p&gt;
+
+&lt;p&gt;首先定义
+&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/items.html#module-scrapy.item&quot;&gt;Item&lt;/a&gt;：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.item&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConvStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;branch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;alias&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;address&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;city&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;district&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;longitude&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;serializer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;latitude&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Field&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;serializer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这里定义了一个便利店（&lt;code&gt;ConvStore&lt;/code&gt;）所应包含的内容（
+&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/items.html#item-fields&quot;&gt;Field&lt;/a&gt; ），会在
+spider 中用到，用来承载其抓取下来的实际数据。&lt;/p&gt;
+
+&lt;p&gt;现在来看 spider：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.linkextractors.sgml&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SgmlLinkExtractor&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.spiders&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CrawlSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rule&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.selector&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;lawson.items&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LawsonSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CrawlSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;lawson&amp;#39;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;start_urls&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;allowed_domains&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;lawson.com.cn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SgmlLinkExtractor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;#39;list\?area_id=\d+&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;parse_store_list&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_store_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;罗森&amp;#39;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;alias&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;Lawson&amp;#39;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;branch&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;address&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;td/span/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;district&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;link_text&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;city&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;上海&amp;#39;&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;首先可以看到代码很短，整个 &lt;code&gt;LawsonSpider&lt;/code&gt; 类只有二十多行，但已经能够为我们抓
+取所有必需的信息。&lt;/li&gt;
+&lt;li&gt;scrapy 提供了一些基本类（Base class）让我们去继承，
+&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/spiders.html#crawlspider&quot;&gt;&lt;code&gt;CrawlSpider&lt;/code&gt;&lt;/a&gt;
+就是其中之一。代码中所定义的类变量（Class variable）都是再 scrapy 中有各自作
+用的。
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; 是该 spider 的名字，scrapy 命令行工具调用 spider 时就用这个名字去找
+到对应的 spider。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;start_urls&lt;/code&gt; 是 spider 的入口，即是告诉它该从哪个网页开始抓取。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;allowed_domains&lt;/code&gt; 限定 spider 的抓取活动只能在指定的 domain 中进行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rules&lt;/code&gt; 定义了一系列规则用来匹配网页中出现的内容，并根据规则分发至不同的处理
+方法中。这里定义了一个规则是向网页中所有匹配正则表达式 &lt;code&gt;r'list\?area_id=\d+'&lt;/code&gt;
+的链接（如果你在浏览器打开初始页面的话会发现这些就是页面下方以上海各个区命名
+的那几个链接）发出请求并将其结果交给 &lt;code&gt;parse_store_list&lt;/code&gt; 方法（Method）来处理。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/link-extractors.html#sgmllinkextractor&quot;&gt;&lt;code&gt;SgmlLinkExtractor&lt;/code&gt;&lt;/a&gt;
+是 scrapy 提供的连接提取器，它的用途就是，呃，提取链接。
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;allow&lt;/code&gt; 参数是正则表达式，网页中匹配的链接会被抓取。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tags&lt;/code&gt; 指定从哪些标签抓取链接，默认 &lt;code&gt;['a', 'area']&lt;/code&gt;（通过分析网页
+这里不能包含 &lt;code&gt;area&lt;/code&gt;，故手动指定。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parse_store_list&lt;/code&gt; 方法定义了如何抓取特定网页中的数据
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/selectors.html#scrapy.selector.HtmlXPathSelector&quot;&gt;&lt;code&gt;HtmlXPathSelector&lt;/code&gt;&lt;/a&gt;
+是一个选择器，使用它能方便地定位到网页中的某个位置并抓取其中内容。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;&lt;code&gt;CrawlSpider&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;这个类是整个抓取逻辑的基础，他的工作流程如下：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;若有 &lt;code&gt;start_urls&lt;/code&gt;，则从这些 URL 开始抓取，若没有，则执行 &lt;code&gt;start_requests&lt;/code&gt; 方
+法（用户须定义），并请求该方法返回的 &lt;code&gt;Request&lt;/code&gt; 对象，并从这些请求结果中开始
+抓取。&lt;/li&gt;
+&lt;li&gt;所有网页请求返回的 &lt;code&gt;Response&lt;/code&gt; 默认交给 &lt;code&gt;parse&lt;/code&gt; 方法处理。
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;parse&lt;/code&gt; 方法在 &lt;code&gt;CrawlSpider&lt;/code&gt; 的默认实现是用已定义的 &lt;code&gt;rules&lt;/code&gt; 对获得的网页内
+容进行匹配并进行由 &lt;code&gt;Rule&lt;/code&gt; 所指定的进一步处理（即交给 &lt;code&gt;callback&lt;/code&gt; 参数所指定
+的 &lt;code&gt;callable&lt;/code&gt; 去处理）。&lt;/li&gt;
+&lt;li&gt;若不指定 &lt;code&gt;callback&lt;/code&gt;, &lt;code&gt;Rule&lt;/code&gt; 的默认处理是对匹配的网址发起请求，并再次交给
+&lt;code&gt;parse&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;任何方法中返回的 Item 实例（如示例中的 &lt;code&gt;ConvStore&lt;/code&gt;）都会被作为有效数据保存
+（输出文件等），再处理（
+&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/item-pipeline.html&quot;&gt;Pipeline&lt;/a&gt;）。&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h3&gt;&lt;code&gt;HtmlXPathSelector&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;这是一个通过 &lt;a href=&quot;http://www.w3schools.com/xpath/default.asp&quot;&gt;XPath&lt;/a&gt; 对 HTML 页面进
+行结构化定位和内容读取的工具。scrapy 使用它定位到网页中用户所需要的数据并进行抓
+取。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_store_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;branch&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;address&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;td/span/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HtmlXPathSelector&lt;/code&gt; 需要一个 Response 对象来实例化。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;//div[@class=&quot;ShopList&quot;]/table/tr&lt;/code&gt; 选择了所有包含罗森门店信息的 &lt;code&gt;tr&lt;/code&gt; 标签。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;s.select('th/p/text()').extract()&lt;/code&gt; 在之前的选择基础上继续对其子标签做选择，
+这里就确实得选择到了分店名。&lt;code&gt;extract()&lt;/code&gt; 则将该标签的文本数据读取出来。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HtmlXPathSelector&lt;/code&gt; 还有正则表达式接口，后文会提到。&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Field, Item 及 Item Loader&lt;/h3&gt;
+
+&lt;p&gt;Field 仅仅是一个 &lt;code&gt;dict&lt;/code&gt; 的 wrapper 类，因此使用方法与 &lt;code&gt;dict&lt;/code&gt; 完全一样，在
+scrapy 中它负责声明单个 Item 的字段及该字段的各种行为（如序列化方法
+&lt;code&gt;serializer&lt;/code&gt;）。&lt;/p&gt;
+
+&lt;p&gt;Item 用 Field 定义了单个有效数据的具体字段，而实际中则是主要有两种方法写入
+数据：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;使用其类似 &lt;code&gt;dict&lt;/code&gt; 的接口进行数据的写入和读取，&lt;code&gt;key&lt;/code&gt; 为字段名。&lt;/li&gt;
+&lt;li&gt;使用 &lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/loaders.html&quot;&gt;Item Loader&lt;/a&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;code&gt;dict&lt;/code&gt; 接口的用法如上所示很简单，这里说一下 Item Loader。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.loader&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ItemLoader&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.loader.processor&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Compose&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;lawson.items&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;StoreLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ItemLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;default_output_processor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Compose&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;unicode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;branch_in&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;店&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;endswith&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;店&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LawsonSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CrawlSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_store_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StoreLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;罗森&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;alias&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;Lawson&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;branch&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;address&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;td/span/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;district&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;link_text&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;city&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;上海&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Item Loader 的主要作用是对抓取数据的各个字段进行特殊处理，在这里我们定义了一个
+&lt;code&gt;StoreLoader&lt;/code&gt; 类继承（Inherit）自 &lt;code&gt;ItemLoader&lt;/code&gt;：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;default_output_processor&lt;/code&gt; 定义默认的输出处理器，这里我们对抓取的数据值进行
+strip 操作。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;branch_in&lt;/code&gt; 方法是对 &lt;code&gt;branch&lt;/code&gt; 字段的特殊处理，他发生在输入的时候，也就是刚抓
+取到数据之后。这里的处理是为没有&lt;code&gt;店&lt;/code&gt;这个字的分店名补上这个字。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;field&amp;gt;_in&lt;/code&gt; 和 &lt;code&gt;&amp;lt;field&amp;gt;_out&lt;/code&gt; 会各对指定字段做一次处理，前者是在刚抓取到数据
+时，后者是在最终输出之前，用户根据需要定义相应方法。
+
+&lt;ul&gt;
+&lt;li&gt;scrapy 有一些 &lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/loaders.html#module-scrapy.contrib.loader.processor&quot;&gt;built-in processor&lt;/a&gt;
+可以直接使用，进行一些通用处理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;add_value&lt;/code&gt; 将值赋予相应字段，很好理解。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;load_item&lt;/code&gt; 返回该条填充过数据的 Item。&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;使用 Item Loader 的好处显而易见，我们有一个统一的地方对所有数据字段进行处理，不
+用将其混入抓取逻辑，使整个流程分工明确。&lt;/p&gt;
+
+&lt;p&gt;另一个常用的 Item Loader 是 &lt;code&gt;XPathItemLoader&lt;/code&gt;，显然这个版本利用了 XPath：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;XPathItemLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_xpath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;branch&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr[2]/th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;它将字段与 XPath 表达式关联起来，直接完成定位、读取和写入数据的操作，很方便。&lt;/p&gt;
+
+&lt;h3&gt;加上经纬度&lt;/h3&gt;
+
+&lt;p&gt;经纬度对于定位一个地点是很有用的，通过电子地图能够精确地定位至相关地点。我发现
+罗森网站提供了这个信息，但它并未明文显示，而是需要通过其所链接到的百度地图的页
+面中去抓取下来，听起来很麻烦，但实际却很简单。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;urlparse&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;urljoin&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.loader&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;XPathItemLoader&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.http&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.selector&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.utils.response&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_base_url&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;poi_scrape.items&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;StoreLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;XPathItemLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LawsonSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BasePoiSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_geo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;store&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;lng&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lat&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;#39;(\d+\.\d+),(\d+\.\d+)&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;latitude&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;longitude&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lng&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_store_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StoreLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;map_rel_url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;td/a/@rel&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map_rel_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;map_url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;urljoin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get_base_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map_rel_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parse_geo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;store&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这里为 &lt;code&gt;LawsonSpider&lt;/code&gt; 新增了一个方法 &lt;code&gt;parse_geo&lt;/code&gt;，同时改写了
+&lt;code&gt;parse_store_list&lt;/code&gt;。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;在 &lt;code&gt;parse_store_list&lt;/code&gt; 的循环中我抓取每个店的 &lt;code&gt;tr&lt;/code&gt; 标签中的 &lt;code&gt;td/a/@rel&lt;/code&gt; 属性
+（Attribute）（这里 &lt;code&gt;@rel&lt;/code&gt; 表示 &lt;code&gt;a&lt;/code&gt; 标签的 &lt;code&gt;rel&lt;/code&gt; 属性），若有这一属性则对这个
+地图的链接发起请求，即 &lt;code&gt;yield req&lt;/code&gt;。
+
+&lt;ul&gt;
+&lt;li&gt;在 scrapy 中，spider 类中的方法若返回 Request 实例则 scrapy 会自动对该
+Request 包含的 URL 发出请求，并将其返回的结果封装为 Response 后交给
+&lt;code&gt;callback&lt;/code&gt; 参数中指定的方法处理，若未指定 &lt;code&gt;callback&lt;/code&gt;，则交给 &lt;code&gt;parse&lt;/code&gt; 方法处
+理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;req.meta['store'] = store&lt;/code&gt;，每个 Request 有一个预定义的 &lt;code&gt;meta&lt;/code&gt; 属性（&lt;code&gt;dict&lt;/code&gt;
+），保存在其中的值在其对应的 Response 中可以再次取出：
+&lt;code&gt;store = response.meta['store']&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;hxs.re(r'(\d+\.\d+),(\d+\.\d+)')&lt;/code&gt; 使用了 &lt;code&gt;HtmlXPathSelector&lt;/code&gt; 的正则表达式接
+口直接从网页中通过正则表达式匹配抓取数据。&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;完整 spider 代码&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;items.py&lt;/code&gt; 没有改动，与上文中的一致。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# vim: fileencoding=utf-8&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;urlparse&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;urljoin&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.linkextractors.sgml&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SgmlLinkExtractor&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.loader&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;XPathItemLoader&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.loader.processor&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Compose&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.spiders&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CrawlSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rule&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.http&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.selector&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.utils.response&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_base_url&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;lawson.items&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;StoreLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;XPathItemLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;default_output_processor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Compose&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;unicode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;branch_in&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;店&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;endswith&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;店&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LawsonSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CrawlSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;lawson&amp;#39;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;start_urls&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;allowed_domains&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;lawson.com.cn&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rules&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SgmlLinkExtractor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;#39;list\?area_id=\d+&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;parse_store_list&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_geo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;store&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;lng&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lat&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;#39;(\d+\.\d+),(\d+\.\d+)&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;latitude&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;longitude&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lng&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_store_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_selectors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StoreLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ConvStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;罗森&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;alias&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;Lawson&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;branch&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;address&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;td/span/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;district&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;link_text&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;city&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;上海&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;map_rel_url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;td/a/@rel&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map_rel_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;map_url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;urljoin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get_base_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map_rel_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parse_geo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;store&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load_item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;scrapy 命令行工具&lt;/h3&gt;
+
+&lt;p&gt;scrapy 提供了一些命令行工具
+（&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/commands.html&quot;&gt;Command line tool&lt;/a&gt;），之
+前创建 Project 的时候用到的 &lt;code&gt;startproject&lt;/code&gt; 就是其中之一。而除了这个之外，其他工
+具也各自提供了相当有用的功能。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;$ scrapy
+Scrapy 0.14.4 - project: lawson
+
+Usage:
+  scrapy &amp;lt;command&amp;gt; [options] [args]
+
+Available commands:
+  crawl         Start crawling from a spider or URL
+  deploy        Deploy project in Scrapyd target
+  edit          Edit spider
+  fetch         Fetch a URL using the Scrapy downloader
+  genspider     Generate new spider using pre-defined templates
+  list          List available spiders
+  parse         Parse URL (using its spider) and print the results
+  runspider     Run a self-contained spider (without creating a project)
+  server        Start Scrapyd server for this project
+  settings      Get settings values
+  shell         Interactive scraping console
+  startproject  Create new project
+  version       Print Scrapy version
+  view          Open URL in browser, as seen by Scrapy
+
+Use &amp;quot;scrapy &amp;lt;command&amp;gt; -h&amp;quot; to see more info about a command
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这里仅挑出部分来讲。&lt;/p&gt;
+
+&lt;h4&gt;&lt;code&gt;shell&lt;/code&gt;&lt;/h4&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;scrapy shell &lt;span class=&quot;s1&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;运行后会进入 Python Interpreter，在这里我们能进行各种试验，配合
+&lt;a href=&quot;http://doc.scrapy.org/en/0.14/topics/firebug.html&quot;&gt;Firebug&lt;/a&gt; 之类的工具，为程序
+构建一个原型：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;抓取各区分店列表链接，同时演示 &lt;code&gt;SgmlLInkExtractor&lt;/code&gt; 用法：&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.contrib.linkextractors.sgml&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SgmlLinkExtractor&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SgmlLinkExtractor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;#39;list\?area_id=\d+&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract_links&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Link&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops/list?area_id=1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\u957f\u5b81\u533a&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fragment&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nofollow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+ &lt;span class=&quot;n&quot;&gt;Link&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops/list?area_id=2&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\u5f90\u6c47\u533a&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fragment&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nofollow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+ &lt;span class=&quot;n&quot;&gt;Link&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops/list?area_id=3&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\u9759\u5b89\u533a&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fragment&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nofollow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+ &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;抓取分店列表，&lt;code&gt;fetch&lt;/code&gt; 用来载入新的 URL：&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;http://www.lawson.com.cn/shops/list?area_id=1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xpath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&amp;lt;tr&amp;gt;&amp;lt;th scope=&amp;quot;row&amp;quot; class=&amp;quot;linetop&amp;quot;&amp;gt;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n\t\t\t&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+ &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xpath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&amp;lt;tr&amp;gt;&amp;lt;th scope=&amp;quot;row&amp;quot; class=&amp;quot;linetop&amp;quot;&amp;gt;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n\t\t\t&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+ &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HtmlXPathSelector&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xpath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&amp;lt;tr&amp;gt;&amp;lt;th scope=&amp;quot;row&amp;quot; class=&amp;quot;linetop&amp;quot;&amp;gt;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n\t\t\t&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+ &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;抓取分店名称，演示 &lt;code&gt;HtmlXPathSelector&lt;/code&gt; 用法：&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hxs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;//div[@class=&amp;quot;ShopList&amp;quot;]/table/tr&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n\t\t\t\t\u53e4\u5317\u65b0\u533a\n\t\t\t\t&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;In&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;th/p/text()&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;extract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;u&amp;#39;店&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;古北新区店&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这是一个相当完善的命令行界面，提供了所有必需的网页分析及抓取工具，十分适合在实
+际写抓取程序前做实验。&lt;/p&gt;
+
+&lt;p&gt;而 &lt;code&gt;shell&lt;/code&gt; 不仅能从命令行直接调用，还能从程序中调用直接进入以便分析程序做调试：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scrapy.shell&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inspect_response&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LawsonSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BasePoiSpider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_geo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;inspect_response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_store_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这样在执行到 &lt;code&gt;parse_geo&lt;/code&gt; 时就会掉入 &lt;code&gt;shell&lt;/code&gt; 界面，可以做进一步调试。&lt;/p&gt;
+
+&lt;h4&gt;&lt;code&gt;crawl&lt;/code&gt;&lt;/h4&gt;
+
+&lt;p&gt;真正的抓取就是通过这个命令执行的：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;scrapy crawl store
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;2012-07-18 15:14:58+0800 [scrapy] INFO: Scrapy 0.14.4 started (bot: lawson)
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled extensions: FeedExporter, LogStats, TelnetConsole, CloseSpider, WebService, CoreStats, SpiderState
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled downloader middlewares: HttpAuthMiddleware, DownloadTimeoutMiddleware, UserAgentMiddleware, RetryMiddleware, DefaultHeadersMiddleware, RedirectMiddleware, CookiesMiddleware, HttpCompressionMiddleware, ChunkedTransferMiddleware, DownloaderStats
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled spider middlewares: HttpErrorMiddleware, OffsiteMiddleware, RefererMiddleware, UrlLengthMiddleware, DepthMiddleware
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled item pipelines:
+2012-07-18 15:14:58+0800 [lawson] INFO: Spider opened
+2012-07-18 15:14:58+0800 [lawson] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Telnet console listening on 0.0.0.0:6023
+2012-07-18 15:14:58+0800 [scrapy] DEBUG: Web service listening on 0.0.0.0:6080
+2012-07-18 15:14:59+0800 [lawson] DEBUG: Crawled (200) &amp;lt;GET http://www.lawson.com.cn/shops&amp;gt; (referer: None)
+2012-07-18 15:14:59+0800 [lawson] DEBUG: Crawled (200) &amp;lt;GET http://www.lawson.com.cn/shops/list?area_id=16&amp;gt; (referer: http://www.lawson.com.cn/shops)
+2012-07-18 15:14:59+0800 [lawson] DEBUG: Scraped from &amp;lt;200 http://www.lawson.com.cn/shops/list?area_id=16&amp;gt;
+    {&amp;#39;address&amp;#39;: u&amp;#39;\u5609\u5b9a\u533a\u5609\u677e\u516c\u8def6128\u53f7&amp;#39;,
+     &amp;#39;alias&amp;#39;: u&amp;#39;Lawson&amp;#39;,
+     &amp;#39;branch&amp;#39;: u&amp;#39;\u540c\u6d4e\u5927\u5b66\u5e97&amp;#39;,
+     &amp;#39;city&amp;#39;: u&amp;#39;\u4e0a\u6d77&amp;#39;,
+     &amp;#39;district&amp;#39;: u&amp;#39;\u5609\u5b9a\u533a&amp;#39;,
+     &amp;#39;name&amp;#39;: u&amp;#39;\u7f57\u68ee&amp;#39;}
+...
+2012-07-18 15:15:01+0800 [lawson] DEBUG: Crawled (200) &amp;lt;GET http://www.lawson.com.cn/shops/199/map&amp;gt; (referer: http://www.lawson.com.cn/shops/list?area_id=12)
+2012-07-18 15:15:01+0800 [lawson] DEBUG: Scraped from &amp;lt;200 http://www.lawson.com.cn/shops/199/map&amp;gt;
+    {&amp;#39;address&amp;#39;: u&amp;#39;\u677e\u6c5f\u533a\u897f\u6797\u5317\u8def1048\u53f7&amp;#39;,
+     &amp;#39;alias&amp;#39;: u&amp;#39;Lawson&amp;#39;,
+     &amp;#39;branch&amp;#39;: u&amp;#39;\u677e\u6c5f\u5987\u5e7c\u4fdd\u5065\u9662\u5e97&amp;#39;,
+     &amp;#39;city&amp;#39;: u&amp;#39;\u4e0a\u6d77&amp;#39;,
+     &amp;#39;district&amp;#39;: u&amp;#39;\u677e\u6c5f\u533a&amp;#39;,
+     &amp;#39;latitude&amp;#39;: u&amp;#39;31.030622&amp;#39;,
+     &amp;#39;longitude&amp;#39;: u&amp;#39;121.225586&amp;#39;,
+     &amp;#39;name&amp;#39;: u&amp;#39;\u7f57\u68ee&amp;#39;}
+...
+2012-07-18 15:15:21+0800 [lawson] INFO: Closing spider (finished)
+2012-07-18 15:15:21+0800 [lawson] INFO: Stored csv feed (320 items) in: lawson_store.csv
+2012-07-18 15:15:21+0800 [lawson] INFO: Dumping spider stats:
+    {&amp;#39;downloader/request_bytes&amp;#39;: 158946,
+     &amp;#39;downloader/request_count&amp;#39;: 309,
+     &amp;#39;downloader/request_method_count/GET&amp;#39;: 309,
+     &amp;#39;downloader/response_bytes&amp;#39;: 1883104,
+     &amp;#39;downloader/response_count&amp;#39;: 309,
+     &amp;#39;downloader/response_status_count/200&amp;#39;: 309,
+     &amp;#39;finish_reason&amp;#39;: &amp;#39;finished&amp;#39;,
+     &amp;#39;finish_time&amp;#39;: datetime.datetime(2012, 7, 18, 7, 15, 21, 905140),
+     &amp;#39;item_scraped_count&amp;#39;: 320,
+     &amp;#39;request_depth_max&amp;#39;: 2,
+     &amp;#39;scheduler/memory_enqueued&amp;#39;: 309,
+     &amp;#39;start_time&amp;#39;: datetime.datetime(2012, 7, 18, 7, 14, 58, 538838)}
+2012-07-18 15:15:21+0800 [lawson] INFO: Spider closed (finished)
+2012-07-18 15:15:21+0800 [scrapy] INFO: Dumping global stats:
+    {}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;从最后的报告中可以看到这个 spider 在一分钟内抓取了该网站全部320条数据
+（&lt;code&gt;item_scraped_count&lt;/code&gt;）。&lt;/p&gt;
+
+&lt;p&gt;若要输出抓取结果到一个文件，则加上参数：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;scrapy crawl store -o store.csv -t csv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这样，这篇 scrapy 使用教程的第一部分就结束了。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 18 Jul 2012 14:41:00 +0800</pubDate>
+        <link>http://kanedou.me/2012/07/introducing-python-scrapy-part-i/</link>
+        <guid isPermaLink="true">http://kanedou.me/2012/07/introducing-python-scrapy-part-i/</guid>
+      </item>
+    
+      <item>
+        <title>没有时间胶囊的时间机器</title>
+        <description>&lt;p&gt;Mac 有一个功能叫时间机器（Time
+Machine），它能备份你硬盘上的所有数据到另一个硬盘或者是一个叫
+&lt;a href=&quot;http://www.apple.com/timecapsule/&quot;&gt;时间胶囊（Time Capsule）&lt;/a&gt; 的东西上。&lt;/p&gt;
+
+&lt;p&gt;时间胶囊很好，但是非常非常贵。而另一个办法则需要在 USB 上一直挂一个硬盘，这很麻
+烦。两个办法都不能让我满意，而备份却是必不可少的。&lt;/p&gt;
+
+&lt;p&gt;于是我找到了 &lt;a href=&quot;http://netatalk.sourceforge.net/&quot;&gt;netatalk&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;这是一个跑在 *NIX 机器上的开源 &lt;abbr title=&quot;AppleShare File Server&quot;&gt;AFP&lt;/abbr&gt;
+服务器，它能像 Samba 之于 Windows 一样分享服务器上的文件，也可以将服务器上的一
+个硬盘作为网络硬盘，发挥与时间胶囊相同的作用。要求则是一台 Linux/BSD 服务器。这
+里我以 &lt;a href=&quot;http://www.debian.org&quot;&gt;Debian&lt;/a&gt; 为例说下用法。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+&lt;h2&gt;安装&lt;/h2&gt;
+
+&lt;h3&gt;准备源&lt;/h3&gt;
+
+&lt;p&gt;要支持 OS X 10.7 Lion 就必须安装 2.2 以上的版本，在 Debian 中这个版本在
+&lt;code&gt;wheezy&lt;/code&gt; 的源中，若未启用 &lt;code&gt;wheezy&lt;/code&gt; 则将下面两行加入 &lt;code&gt;/etc/apt/sources.list&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;deb http://mirrors.163.com/debian/ wheezy main contrib non-free
+deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;netatalk&lt;/h3&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt-get update
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt-get install -t wheezy netatalk/wheezy libgcrypt11/wheezy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;装 &lt;code&gt;wheezy&lt;/code&gt; 中的 &lt;code&gt;libgcrypt11&lt;/code&gt; 是因为 &lt;code&gt;netatalk&lt;/code&gt; 打包的一个 bug——它默认依赖的
+这个库的版本不对，会导致 &lt;code&gt;netatalk&lt;/code&gt; crash。Miserable, I know。该 bug
+&lt;a href=&quot;http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=568601#30&quot;&gt;已提交&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3&gt;avahi&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;avahi&lt;/code&gt; 实现了 Apple 的 &lt;code&gt;Bonjour&lt;/code&gt; 协议，可以让你的服务器直接出现在 Finder 侧边
+栏，并可以让 Time Machine 自动找到对应的网络硬盘，省去每次备份前的手动挂载。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt-get install avahi-daemon
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;配置&lt;/h2&gt;
+
+&lt;h3&gt;netatalk&lt;/h3&gt;
+
+&lt;p&gt;在 &lt;code&gt;/etc/netatalk/AppleVolumes.default&lt;/code&gt; 末尾加上&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;&amp;lt;path/to/backup/directory&amp;gt; &amp;quot;TimeMachine on $h&amp;quot; allow:&amp;lt;username&amp;gt; cnidscheme:dbd options:upriv,usedots,tm
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;avahi&lt;/h3&gt;
+
+&lt;p&gt;新建 &lt;code&gt;/etc/avahi/services/afpd.service&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; standalone=&amp;#39;no&amp;#39;?&amp;gt;&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!--*-nxml-*--&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;&amp;lt;!DOCTYPE service-group SYSTEM &amp;quot;avahi-service.dtd&amp;quot;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;service-group&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;name&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;replace-wildcards=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;yes&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;%h&lt;span class=&quot;nt&quot;&gt;&amp;lt;/name&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;service&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;type&amp;gt;&lt;/span&gt;_afpovertcp._tcp&lt;span class=&quot;nt&quot;&gt;&amp;lt;/type&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;port&amp;gt;&lt;/span&gt;548&lt;span class=&quot;nt&quot;&gt;&amp;lt;/port&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/service&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;service&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;type&amp;gt;&lt;/span&gt;_device-info._tcp&lt;span class=&quot;nt&quot;&gt;&amp;lt;/type&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;port&amp;gt;&lt;/span&gt;0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/port&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;txt-record&amp;gt;&lt;/span&gt;model=Xserve&lt;span class=&quot;nt&quot;&gt;&amp;lt;/txt-record&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/service&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/service-group&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Time Machine&lt;/h3&gt;
+
+&lt;p&gt;Time Machine 默认不会显示 AFP 服务器上的网络硬盘，（在 Mac 上）改个参数让它显示
+出来&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;defaults write com.apple.systempreferences TMShowUnsupportedNetworkVolumes 1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;启动&lt;/h2&gt;
+
+&lt;p&gt;重启 &lt;code&gt;netatalk&lt;/code&gt; 和 &lt;code&gt;avahi&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;service netatalk restart
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;service avahi-daemon restart
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这时候 Finder 中应该会出现服务器的图标，点击挂载（第一次需要，之后只要 &lt;code&gt;avahi&lt;/code&gt;
+开着 Time Machine 自己会找到）&lt;/p&gt;
+
+&lt;p&gt;&lt;img class=&quot;plain&quot; src=&quot;http://pic.yupoo.com/kols_v/C4pgfYwD/14hgGk.png&quot;
+alt=&quot;Finder&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;打开 Time Machine，看到配置好的硬盘，选择即可&lt;/p&gt;
+
+&lt;p&gt;&lt;img class=&quot;plain&quot; src=&quot;http://pic.yupoo.com/kols_v/C4pgfQEP/15D4b1.png&quot; alt=&quot;Time Machine&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 26 Jun 2012 22:46:00 +0800</pubDate>
+        <link>http://kanedou.me/2012/06/time-machine-with-netatalk/</link>
+        <guid isPermaLink="true">http://kanedou.me/2012/06/time-machine-with-netatalk/</guid>
+      </item>
+    
+      <item>
+        <title>WordPress on dotCloud</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://dotcloud.com&quot;&gt;dotCloud&lt;/a&gt; 是一个平台，或者是一个有人代为管理的服务器。它的主要用途是让人们免费的发布自己的
+Web 应用，并且在其之上省去了管理服务器的工作，也就省去了相当的繁琐，使得发布应用更快速方便，并且使得 Developer
+专注于应用，而不用为发布操太多心。想想那些名字，apache、nginx、php-fpm、uwsgi、SSL
+等等等等，各种各样的各不相同的设置与调试只会让人觉得麻烦、不轻松，虽然这其中也有知识。 然而 dotCloud 的应用发布则相当简单：
+（dotcloud 的 python
+客户端安装及命令行基本使用方法请参考&lt;a href=&quot;https://docs.dotcloud.com/&quot;&gt;官方文档&lt;/a&gt;，很简单。）&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;新建 namespace。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ dotcloud create kdblue
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;建立 Build File。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;dotcloud.yml:
+
+www:
+  approot: blog
+  type: php
+  instances: 3
+db:
+  type: mysql
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;www&lt;/code&gt; 与 &lt;code&gt;db&lt;/code&gt; 为 service 名称。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;approot&lt;/code&gt; 指定该 service 所在的本地根目录。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;type&lt;/code&gt; 指定应用类型（语言、服务器）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;instances&lt;/code&gt; 设置进程数，若是 php 应用则会启动相应数量的 php-fpm 进程。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;将设置推送至服务器。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ dotcloud push kdblue .
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;这样，一个名为 Build File 的 &lt;code&gt;dotcloud.yml&lt;/code&gt; 文件就完成了所有服务器端的设置，简单并且轻量。 接下来的工作就是
+WordPress
+的自身设置，根据&lt;a href=&quot;http://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Install&quot;&gt;著名的5分钟安装&lt;/a&gt;教程教我们的：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;搞到 WordPress。&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;在服务器上搞定数据库设置。&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;首先获取 mysql 数据库密码及地址。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ dotcloud info kdblue.db
+build_revision: rsync-1309344965.25
+cluster: wolverine
+config:
+    hostname: kdblue-default-blog-db-0
+    mysql_password: tpKsNbSjxXlb7I8DM3RH
+created_at: 1309267100.7312429
+ports:
+-   name: ssh
+    url: tcp://53e93k2c.dotcloud.com:9219
+-   name: mysql
+    url: tcp://53e93k2c.dotcloud.com:9220
+state: running
+type: mysql
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;登录并创建 WordPress 用数据库。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ dotcloud run kdblue.db -- mysql -u root -ptpKsNbSjxXlb7I8DM3RH
+(Below in mysql shell)
+&amp;gt; create user 'dql' identified by 'password';
+&amp;gt; create database wordpress;
+&amp;gt; grant all on wordpress.* to 'dql'@'%'
+  identified by 'password';
+&amp;gt; flush privileges;
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;重命名 &lt;code&gt;wp-config-sample.php&lt;/code&gt; 为 &lt;code&gt;wp-config.php&lt;/code&gt;。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;修改 &lt;code&gt;wp-config.php&lt;/code&gt; 中的数据库设置。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;define('DB_NAME', 'blog');
+define('DB_USER', 'dql');
+define('DB_PASSWORD', 'password');
+define('DB_HOST', '53e93k2c.dotcloud.com:9220');
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;确认一下文件树结构。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  myapp/
+  |- dotcloud.yml
+  |_ blog/
+     |_ wordpress/
+         |_ wp-config.php
+         |_ wp-contents/
+         |_ ...
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;将设置完毕的 WordPress 推送至服务器并重启进程。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ dotcloud push kdblue .
+$ dotcloud restart kdblue.www
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;至此 WordPress 便部署成功，访问
+&lt;code&gt;http://53e93k2c.dotcloud.com/wordpress/wp-admin/install&lt;/code&gt; 即可完成安装。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;有域名的可以设置自定义域名，并按说明更改相应 DNS 设置。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ dotcloud alias add kdblue.www www.example.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;之后是一些有用的 Tip。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;因为每次 &lt;code&gt;push&lt;/code&gt; 都会将服务器端的更改删除（例如安装插件），因此可以使用一个 Post-Install Hook 来避免。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#!/bin/sh
+if [ -d ~/data/wp-content ]
+then
+      rm -rf ~/current/wordpress/wp-content
+else
+      mkdir -p ~/data
+      mv ~/current/wordpress/wp-content ~/data/wp-content
+fi
+ln -s ~/data/wp-content ~/current/wordpress/wp-content
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;将此文件命名为 &lt;code&gt;postinstall&lt;/code&gt; 加上执行权限后放在 &lt;code&gt;approot&lt;/code&gt; 目录下，这样每次 &lt;code&gt;push&lt;/code&gt;
+后之前网页端所做的更改都会保留。（但升级 WordPress 本体似乎必须在本地执行后推送）&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;若要直接在域名处（&lt;code&gt;www.example.com&lt;/code&gt;）而非子目录处（&lt;code&gt;www.example.com/wordpress&lt;/code&gt;）显示
+WordPress，则需要自定义一项 nginx 设置。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;try_files $uri $uri/ /index.php;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;保存为 &lt;code&gt;nginx.conf&lt;/code&gt; 后放在 &lt;code&gt;approot&lt;/code&gt; 目录中。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://www.wwwizer.com/&quot;&gt;wwwizer&lt;/a&gt; 可以免费将 dotcloud 不支持的 naked domain
+301重定向到前缀 www 的子域名，免费且不用注册，直接 A 记录指向其提供的 IP 即可。&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Fri, 01 Jul 2011 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2011/07/wordpress-dotcloud/</link>
+        <guid isPermaLink="true">http://kanedou.me/2011/07/wordpress-dotcloud/</guid>
+      </item>
+    
+      <item>
+        <title>用 Python 建英语单词表</title>
+        <description>&lt;p&gt;今天受到 dofine
+同学&lt;a href=&quot;http://blog.dofine.info/2010/10/use-org-mode-to-recite-words.html&quot;&gt;这篇文章&lt;/a&gt;
+的启发，想到也可以用相同的办法（Org-Mode 的 Checkbox）来背平时用
+&lt;a href=&quot;http://stardict.sourceforge.net/&quot;&gt;Stardict&lt;/a&gt; 记下的陌生单词，于是写了一个
+&lt;a href=&quot;http://python.org&quot;&gt;Python&lt;/a&gt; 脚本来将单词整理起来，过程中使用了 Dict.CN 的
+&lt;a href=&quot;http://dict.cn/ws.php?q=word&quot;&gt;API接口&lt;/a&gt; 获取单词的音标，释义以及例句。效果看图：&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AAxA5L5B/11io9J.png&quot; title=&quot;owlb1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AAxA5L5B/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+&lt;p&gt;输入源：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;delineate
+parity
+heterogeneous
+deterministic
+heterogeneous,
+Intersect
+impede
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;脚本文件这里找：&lt;a href=&quot;http://github.com/kols/util_scripts/blob/master/owlb.py&quot;&gt;owlb.py&lt;/a&gt;
+，用法为输入一个纯文本单词文件（格式如上：一个单词一行），输出相应 &lt;code&gt;.org&lt;/code&gt; 文件，
+具体请看 &lt;code&gt;python owlb.py --help&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;2010/11/05 Updated：&lt;/em&gt;现在脚本可以在原有单词列表上附加新单词，不会重复，只要将原列表作为输出文件即可。&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;2011/03/17 Updated：&lt;/em&gt;重写后，现在的运行速度提高至原版的十倍。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 31 Oct 2010 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2010/10/build-word-list-using-python/</link>
+        <guid isPermaLink="true">http://kanedou.me/2010/10/build-word-list-using-python/</guid>
+      </item>
+    
+      <item>
+        <title>如何用 Org-Mode 做笔记</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://orgmode.org/&quot;&gt;&lt;em&gt;Org-Mode&lt;/em&gt;&lt;/a&gt; 是
+&lt;a href=&quot;http://www.gnu.org/software/emacs/&quot;&gt;&lt;em&gt;Emacs&lt;/em&gt;&lt;/a&gt; 中的一个 Major Mode
+，主要用于做笔记，管理待办事项（TODO list）以及做项目计划（摘自其《用户手册（The Org
+Manual）》）。当然，这是笼统的描述，就像说 &lt;em&gt;Emacs&lt;/em&gt;
+只是一个编辑器一般有种别样的幽默，但是今天我正是以其基本的笔记功能作为主题来简略地介绍一下这个有用并且好用的工具。
+ 整篇文章只叙述 &lt;em&gt;Org-Mode&lt;/em&gt; 的使用方法及最终效果，不会对各种设置做介绍也不会涉及 &lt;em&gt;Emacs&lt;/em&gt;
+的使用，因此，这是一篇给所有人看的文章。&lt;/p&gt;
+
+&lt;h3&gt;概览&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzqxXL3X/IAYB1.png&quot; title=&quot;orgmode1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzqxXL3X/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图是我最近正在学习的 &lt;a href=&quot;http://www.python.org&quot;&gt;&lt;em&gt;Python&lt;/em&gt;&lt;/a&gt;
+的笔记的截图，整个笔记结构很清晰，最上层的蓝色大字是标题，而后渐次缩小并改变颜色的以 &lt;code&gt;*&lt;/code&gt;
+为首的条目均是按层级内嵌的各种小标题，其中缩进最远的则是标题中的具体内容。可以看到，以颜色以及字体大小来凸显笔记的层级区分相当的醒目，并且每一层次的内容均可收起以节省显示空间来专注于当前需要记录或查看的条目，这样的排版使得笔记的可看性也提高许多，而条目尾部的冒号部分则是该条目的标签（Tag），在搜索笔记时这是一个重要的筛选标准，可以快速定位至相关条目。值得注意的是，那些被
+&lt;code&gt;=&lt;/code&gt; 包裹的文字在之后导出（Export）为 HTML 或 PDF 格式后会带有相应格式。另外其中 &lt;code&gt;#+BEGIN_SRC python&lt;/code&gt;
+至 &lt;code&gt;#+END_SRC&lt;/code&gt; 之间的程序源代码在输出时亦会高亮显示语法。而最下面的 Footnotes
+则是脚注，这张图片未显示其效果，具体则是与一般看书时遇到的脚注差不多。
+ 这是对 &lt;em&gt;Org-Mode&lt;/em&gt;
+最初的概览，之后的部分则会从笔记的两个重要方面着手，查看其真正的实用性，并简单介绍除记录外其另一个有用的功能，最终你能看到的是一篇完全用
+&lt;em&gt;Org-Mode&lt;/em&gt; 记录下的笔记。
+ 而第一步则是我们该如何以最高的效率及最小的麻烦写下一条笔记。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+&lt;h3&gt;捕捉（Capture）&lt;/h3&gt;
+
+&lt;p&gt;电脑中笔记的记录，首要的便是方便、快捷，也就是在想写的时候就能马上写，并且不用担心任何例如归类，存档之类的琐碎问题。就像随身的纸笔，拿来即写，写完即成，没有多余的动作。
+ 这里我们要说的就是 &lt;em&gt;Org-Mode&lt;/em&gt; 的 org-capture 功能，它的功能就是“捕捉”，而捕捉所需的就是快速、准确、不冗杂。
+org-capture 的操作流程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzfMqdMs/mNCTL.png&quot; title=&quot;orgcap1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzfMqdMs/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图是命令调出 org-capture 后的第一个介面，
+我需要做的是在画面下方这些我已预设好的模板（Template）之中选择一个来进行记录。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzfKpnsr/Q062A.png&quot; title=&quot;orgcap2&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzfKpnsr/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;选择 pick 模板后便转入这个介面，可以看到，现在按照模板的要求我必须在窗口最底部的 Mini buffer
+中输入这条笔记的主题（Subject），也就是标题，输入完标题后还会需要输入标签，之后光标则会跳至图中 &lt;code&gt;%?&lt;/code&gt;
+处来完成最后的笔记正文的输入。另外可以看到的是图中除了我上述所说的三个手动输入部分以外，其他内容均是模板预设的内容，例如笔记创建时间（Created），以及与笔记相关的超链接（Link）。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzfSUoJF/CRDKe.png&quot; title=&quot;orgcap3&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzfSUoJF/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;这就是一条输入完毕的笔记的样子，之后需要做的就是按 &lt;code&gt;Ctrl-c&lt;/code&gt; 两次进行保存，当然如果写完后又觉得不需要了则可以
+&lt;code&gt;Ctrl-c Ctrl-k&lt;/code&gt; 进行删除，而如果需要将笔记保存至默认文件外的其他文件中，则是按 &lt;code&gt;Ctrl-c Ctrl-w&lt;/code&gt; 进行
+&lt;code&gt;refile&lt;/code&gt; 。
+ 到此整个笔记记录的流程就结束了，所写下的这条笔记会按照模板的预设被保存到相应的文件中去，在这里则是进入名为 &lt;code&gt;pieces.org&lt;/code&gt;
+的文件中去，看下面这张图，它到了文件的最下面。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/Azg0yk72/dliE4.png&quot; title=&quot;orgcap4&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/Azg0yk72/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;整个过程中我始终关注要记录的是什么，而模板则解决了其他繁杂重复但仍有记录价值的部分（时间，标签，保存至相应文件等）。我只需要：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;快捷键呼出笔记介面&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;输入笔记&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;快捷键保存&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;其中1、3步需要做的只是敲击几下键盘，第2步则只关注并输入真正重要的内容，因此，整个过程是简单有效的。&lt;/p&gt;
+
+&lt;p&gt;然而，高效的记录只是第一步。当笔记完成之后，特别是当笔记条目累积至一个较大的数目的时候，快速找到所需要的内容便成为一个亟须的功能，这也就是文章下一部分的内容——搜索。&lt;/p&gt;
+
+&lt;h3&gt;搜索&lt;/h3&gt;
+
+&lt;p&gt;搜索之所以重要是因为笔记就是用来记录那些不记下来便会忘记的内容，因此，笔记最重要的一个用处就是查阅，而在相当多的条目中光靠一般的全文搜索是比较难以快速准确地定位到某条特定内容的。
+&lt;em&gt;Org-Mode&lt;/em&gt; 则提供了多种搜索方式，先来看其中的几个。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzirLsss/WkVtx.png&quot; title=&quot;orgsearch1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzirLsss/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;按下 &lt;code&gt;Ctrl-c a&lt;/code&gt; 后下半窗口弹出的是 &lt;em&gt;Org-Mode&lt;/em&gt; 的日程命令，多数搜索命令也在其中，包括搜索标签、属性（ &lt;code&gt;m&lt;/code&gt;
+)，包含关键词的条目（ &lt;code&gt;s&lt;/code&gt; ）以及所有关键词的位置（ &lt;code&gt;/&lt;/code&gt;
+），这些搜索各适合不同的情况，标签搜索自然是比较快速的定位方法，但是若关键词不在标签中或根本没有使用标签则退而求其次直接搜索关键词，这样得到的结果可能比较多但是因为它支持正则表达式，如果活用应该也能相当方便的找到所需内容。而若需要定位关键词在
+org 文件中所有出现的位置，则 &lt;code&gt;Multi-occur&lt;/code&gt;
+是最好的方式。我常用的是前两种，它们都会定位到包含关键词的条目，这样浏览一下标题就基本能够找到需要的内容。
+ 下面看一下实际操作时的介面：&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzirP9xU/DMGg2.png&quot; title=&quot;orgsearchmatch1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzirP9xU/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;这张图片匹配了标签中含有 &lt;code&gt;g1&lt;/code&gt; 的条目，通常我要备份手机里内容的时候就会查看那条 &lt;code&gt;g1 backup list&lt;/code&gt;
+中记下的内容。另外画面最下方的 Mini buffer 中显示出了该条笔记在哪个文件的哪个标题的哪个小标题中，按 &lt;code&gt;Enter&lt;/code&gt; 或 &lt;code&gt;Tab&lt;/code&gt;
+都可直接跳至该文件。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzirNuaY/4L0ez.png&quot; title=&quot;orgsearchkw1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzirNuaY/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;这是全文关键词搜索的结果，可以看到这里显示的条目要比标签搜索的结果多出一些，并且包含了一条明显与 &lt;em&gt;G1&lt;/em&gt; 无关的 &lt;em&gt;Python&lt;/em&gt;
+笔记，这是因为那条笔记里也包含 &lt;code&gt;g1&lt;/code&gt; 这两个字符。同样下方也指名了该笔记的详细位置。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzirTyfv/FjFFR.png&quot; title=&quot;orgsearchmo1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzirTyfv/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;在这里所有 org 文件中包含 &lt;code&gt;g1&lt;/code&gt; 这两个字符的所有位置都被找了出来，包括标题与正文，左侧数字指明其在该文件第几行。&lt;/p&gt;
+
+&lt;p&gt; 这就是 &lt;em&gt;Org-Mode&lt;/em&gt;
+中的几种主要搜索方式，基本上可以很方便的找到所需的内容，当然搜索的质量也是与记录的质量相挂钩的，例如如果做好了每条笔记的标签工作，则能够在同时使用多个标签作为关键词的情况下迅速匹配出所需的条目。
+ 然而，除了这三个方法以外， &lt;em&gt;Org-Mode&lt;/em&gt; 另外还提供了一种名为 &lt;code&gt;Sparse tree&lt;/code&gt;
+的搜索方法。这种方法的主要应用是在某个文件中迅速定位至所需内容并且自动隐藏其他的无关内容，比如这样：&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzjvqRh7/16SBK.png&quot; title=&quot;orgsparsetree2&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzjvqRh7/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;关键词为 &lt;code&gt;fixme&lt;/code&gt;
+，可以看到在图中被高亮了，概览中原本包含相当长的文本内容，现在全被隐藏了，只有与搜索条目相关的内容被显示了出来。从而，这个搜索方法比较适合定位至文件中某些做过标记的地方，当然，若用来搜索需要的内容也同样方便。&lt;/p&gt;
+
+&lt;p&gt; 这样就总结了 &lt;em&gt;Org-Mode&lt;/em&gt;
+中我所知道的几种搜索方式，它们各有各的适合用途，合理使用就能够快速找到所需的内容。而下面接着的话题则并非笔记中所必须的步骤，然而，它却是
+一个实用的功能，也是 &lt;em&gt;Org-Mode&lt;/em&gt; 强大灵活的一个体现，也就是——笔记的导出。&lt;/p&gt;
+
+&lt;h3&gt;导出（Export）&lt;/h3&gt;
+
+&lt;p&gt;导出功能可以方便的将整理好的 org 文件转换成多种适合发布的文件类型，包括 HTML 、 PDF 、 DocBook
+及其他多种格式，这里我只介绍自己经常用的 HTML 导出。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AzpoHJdl/MoDF6.png&quot; title=&quot;orgexport1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AzpoHJdl/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;图中可看到 &lt;em&gt;Org-Mode&lt;/em&gt; 的导出功能很庞大，基本涵盖了所有实用的文件格式。&lt;/p&gt;
+
+&lt;p&gt; 导出文件并不需要额外的操作，只需要输入导出命令（ &lt;code&gt;Ctrl-c Ctrl-e h&lt;/code&gt; ）即可，文件会自动被导出为 HTML
+文件，但其只有基本的 CSS 格式，当然这可以通过简单地自定义相应的 CSS
+文件来解决。另外在对包含源代码的文件进行导出操作时会自动为其高亮显示语法，效果与在 &lt;em&gt;Emacs&lt;/em&gt;
+中的语法高亮完全一样，另外其针对源码还可先执行然后导出运行的结果，这对于诠释语法以及到达某些特殊需求有着相当大的作用。除此以外，还可以进行选择性导出，可以仅导出文件中的某些或某一部分内容，或者可以直接生成文件相应的
+HTML 语法以适合在其他程序中发布（如 &lt;em&gt;WordPress&lt;/em&gt; ）。&lt;/p&gt;
+
+&lt;p&gt; 不过导出只是整个发布环节中的第一步。在得到需要的文件后上传至相应服务器也是一件麻烦事，然而， &lt;em&gt;Org-Mode&lt;/em&gt;
+却想到了这一步，提供发布（Publish）的功能，这样便能够自动化地完成从转换格式到上传文件乃至整个项目文件夹的复杂工作，相当便利。细心的人可以发现在上图的最下两行即是发布命令，相应的可以发布单一文件，发布整个项目，或发布所有项目。这些都只需在配置文件中做出相应设置即可，但这里不会涉及。&lt;/p&gt;
+
+&lt;p&gt;最后，看一篇笔记输出并发布后的最终效果：&lt;a href=&quot;http://kdblue.com/notes/pythonotes.html&quot;&gt;Pythonotes&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 24 Oct 2010 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2010/10/note-with-orgmode/</link>
+        <guid isPermaLink="true">http://kanedou.me/2010/10/note-with-orgmode/</guid>
+      </item>
+    
+      <item>
+        <title>Gentoo的SSH代理启动脚本</title>
+        <description>&lt;p&gt;&lt;abbr title=&quot;Secure Shell&quot;&gt;SSH&lt;/abbr&gt; 代理是相当方便的翻墙工具，我因为不想用其他多余的工具来使用它，因此，出于方便，自己写了一个用于 Gentoo 下的 Initscript，需要的同学可以把下面这个文件放到 &lt;code&gt;/etc/init.d/sshtunnel&lt;/code&gt; 修改 &lt;code&gt;username&lt;/code&gt; 和 &lt;code&gt;remotehost&lt;/code&gt; 两个变量并新建一个软链 &lt;code&gt;/usr/bin/sshtn&lt;/code&gt; 至 &lt;code&gt;/usr/bin/ssh&lt;/code&gt;，最后使用 &lt;code&gt;sudo rc-update add sshtunnel default&lt;/code&gt; 来启用，默认端口7070。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;c&quot;&gt;#!/sbin/runscript&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#: Author: Kane Dou &amp;lt;douqilong@gmail.com&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#: Description: Create ssh tunnel to remote server to establish a socks proxy.&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;processname&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;sshtn&amp;#39;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# Symbolic link to /usr/bin/ssh to prevent&lt;/span&gt;
+                    &lt;span class=&quot;c&quot;&gt;#+start-stop-daemon from stoping other ssh connections&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;qnTfND&amp;#39;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# q for quiet&lt;/span&gt;
+                &lt;span class=&quot;c&quot;&gt;#+n for output to /dev/null&lt;/span&gt;
+                &lt;span class=&quot;c&quot;&gt;#+T for no tty allocation&lt;/span&gt;
+                &lt;span class=&quot;c&quot;&gt;#+f for fork to background&lt;/span&gt;
+                &lt;span class=&quot;c&quot;&gt;#+N for no command execution&lt;/span&gt;
+                &lt;span class=&quot;c&quot;&gt;#+D for dynamic port forwarding&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;[ChangeMe]&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;remotehost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;[ChangeMe]&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;7070 &lt;span class=&quot;c&quot;&gt;# Change me maybe&lt;/span&gt;
+
+depend&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    need net
+    before NetworkManager
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+start&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    ebegin &lt;span class=&quot;s2&quot;&gt;&amp;quot;Starting SSH Tunnel&amp;quot;&lt;/span&gt;
+    start-stop-daemon --start --quiet --name &lt;span class=&quot;s2&quot;&gt;&amp;quot;$processname&amp;quot;&lt;/span&gt;
+    --exec /usr/bin/sshtn -- -&lt;span class=&quot;s2&quot;&gt;&amp;quot;$args&amp;quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$port&amp;quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$username&amp;quot;&lt;/span&gt;@&lt;span class=&quot;s2&quot;&gt;&amp;quot;$remotehost&amp;quot;&lt;/span&gt;
+    eend &lt;span class=&quot;nv&quot;&gt;$?&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+stop&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    ebegin &lt;span class=&quot;s2&quot;&gt;&amp;quot;Stopping SSH Tunnel&amp;quot;&lt;/span&gt;
+    start-stop-daemon --stop --quiet --name &lt;span class=&quot;s2&quot;&gt;&amp;quot;$processname&amp;quot;&lt;/span&gt;
+    eend &lt;span class=&quot;nv&quot;&gt;$?&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+restart&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    ebegin &lt;span class=&quot;s2&quot;&gt;&amp;quot;Will restart SSH Tunnel&amp;quot;&lt;/span&gt;
+    svc_stop
+    sleep 3
+    svc_start
+    eend &lt;span class=&quot;nv&quot;&gt;$?&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# vim: set ft=gentoo-init-d ts=3 sw=3 et:&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;注意，如果服务器会自动切断不活动的 SSH 连接，请在 &lt;code&gt;$HOME/.ssh/config&lt;/code&gt; 中加入：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Host [RemoteServerName]
+ServerAliveInterval 60
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;2011/04/28 Update: 又写了个 Debian 版本，&lt;a href=&quot;https://github.com/kols/util_scripts/blob/master/ssh_initscript/sshtunnel_debian&quot;&gt;这里&lt;/a&gt;找&lt;/p&gt;
+</description>
+        <pubDate>Thu, 30 Sep 2010 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2010/09/gentoo-ssh-proxy-initscript/</link>
+        <guid isPermaLink="true">http://kanedou.me/2010/09/gentoo-ssh-proxy-initscript/</guid>
+      </item>
+    
+      <item>
+        <title>九月</title>
+        <description>&lt;p&gt;这个月又要过去了，我现在的作文频率已降至历史低点，正是与房价相反，跟股市接轨。&lt;/p&gt;
+
+&lt;p&gt;月初干了些什么真的倒还不太记得了，更不要说有人问我六个月前写的那些得得瑟瑟的都是什么了，我更说不上来。这样吧，咱倒着写，可能有助于恢复记忆。&lt;/p&gt;
+
+&lt;p&gt;今天除了继续研究Gentoo以外还研究了一下怎么才能让 &lt;em&gt;Dead Rising 2&lt;/em&gt; 这个游戏能不这么卡，怎么卡？就是一会儿像幻灯片一会儿像幻灯片那么卡，但他不总是像幻灯片，所以我错以为这是像希望一样的那种东西。于是在本来可以植物大战僵尸的时候，我不得不去研究怎么让僵尸变漂亮变得不那么卡而奋斗，但结果是让人沮丧的，在我一遍遍以开场白的肢解僵尸作为卡还是不卡的测试之后，除了显卡和CPU有烧焦的倾向外一切都没有改变，不论我是超频还是装驱动，又或者寄希望于Win7的最新火星科技。既然这样我就不得不承认，很多东西我必须得对它说不……&lt;/p&gt;
+
+&lt;p&gt;这必须是一个bug！但是，噢，说到bug，今天我也遇到了不止一个，虽然不总是跟僵尸有关，但这个bug还是有些用的，对某些人来说。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+
+&lt;p&gt;&lt;a href=&quot;https://launchpad.net/notify-osd&quot;&gt;notify-osd&lt;/a&gt;是Ubuntu的一个桌面通知程序，很漂亮、很优雅，但是gentoo里没有它，于是只能自己编译一个来用，这些不是问题，问题是pidgin，它有个pidgin-libnotify的插件是可以与notify-osd打交道的，然后把聊天信息以那种很漂亮、很优雅的方式通知给我，但是从Gentoo自己的软件库里安装的这个插件是有点小问题以至于notify-osd无法跟它很好沟通，从而本来美观的通知变成了…厄…对话框……这是个大问题。&lt;/p&gt;
+
+&lt;p&gt;于是找Google帮忙，很快地在Debian的bugzilla发现了有关这个问题的&lt;a href=&quot;http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=549265#40&quot;&gt;补丁&lt;/a&gt;，打上补丁后重新编译安装pidgin-libnotify。这样一来本来的丑陋对话框就又变成了好看的通知信息。&lt;/p&gt;
+
+&lt;p&gt;既然测试成功，并且这个补丁似乎也已经被Debian接受，Gentoo用户应该也可以享受到，于是去到Gentoo的bugzilla提交了&lt;a href=&quot;http://bugs.gentoo.org/show_bug.cgi?id=338927&quot;&gt;这个建议&lt;/a&gt;。
+事情也就是这样。&lt;/p&gt;
+
+&lt;p&gt;前不久又去了世博会，是第二次去，依然是热辣的太阳和满头满脸的人群。但这次还算有效率，走遍了欧洲非洲，还轮渡到了浦西，各个国家大大小小的馆去了也有十几个，是和一个每次qq都会发笑脸过来却被我扔炸弹回去仍然百折不挠的家伙一起的。&lt;/p&gt;
+
+&lt;p&gt;班级聚会聚不起，寝室聚会也聚不起，每位工作了的都是麻烦一身，养家糊口就是这样忙，因此这个样子应该还算正常。&lt;/p&gt;
+
+&lt;p&gt;月中似乎是在新装Gentoo的阶段，各种编译、各种文档消耗了大量时间，但借此机会也认认真真地调整了一回Kernel，于是所谓&lt;em&gt;2.6.34-gentoo-r6-r50e-dt-bb-r1&lt;/em&gt;的Kernel就以这样超长（也超囧？）的代号登场了，备份了config，也做好Todo和ChangeLog。对了，顺便一问，有人知道与Thinkpad的Trackpoint相关Kernel选项是哪一个吗？请不吝赐教。&lt;/p&gt;
+
+&lt;p&gt;月初则是在写python，主要是同步校内头像到Google Contacts的脚本，起因是看着我的G1通讯录里一个个机器人头像不太爽。基本做通了，可用，接下来就是把事情搞复杂，塞一些外星人也用不到的功能进去，加点彩蛋……过程中不满意的自然是校内那边的数据接口了，只提供Web程序的认证接口而不提供一般的Basic Auth让这个脚本的实现有些…奇怪……&lt;/p&gt;
+
+&lt;p&gt;写到这我得说我用的这个方法真是有效，一下子帮我把很多事情都给写出来了，虽然想像中应该没做多少事，但实际则是似乎还有些成果。&lt;/p&gt;
+
+&lt;p&gt;继续吧，今天则到此为止。&lt;/p&gt;
+</description>
+        <pubDate>Mon, 27 Sep 2010 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2010/09/the-september/</link>
+        <guid isPermaLink="true">http://kanedou.me/2010/09/the-september/</guid>
+      </item>
+    
+      <item>
+        <title>全部都是</title>
+        <description>&lt;p&gt;『他妈的都在乱搞，贪污，无能，吃喝嫖赌，不干活的拿钱最多，放空话，偷鸡摸狗，用纳税人的钱玩票，这世道！』全部都是，当转头，转身，或者走出去，与谁见面，听到的全部都是；当身边，网络上，电视中，卖场里，路过或默默在边上侧耳，听到的全部都是。不可能应该是这样的，这样是不好的，但不要扯什么好不好。它没法让你觉得更快乐了，哦！快乐只是把温暖的枪，受难才是这里的一切生物所真正需要的，不需要的都已经逃离了。&lt;/p&gt;
+
+&lt;p&gt;说了一些意思不明的话，我其实只是在用另一个消极的声音向每个人诉说身边全部都是的消极的声音。当电视机上一个个掐架节目大行其道、悲惨的犯罪受害者泣不成声、拜物主义者一遍又一遍的说着他要什么但却得不到的时候；当twitter上一个个有着莫名优越感的人莫名的诉说着这个世界的种种疾苦看似忧心忡忡、被蹂躏而感觉毫无尊严感的人暴跳如雷指控着自身经历的不公、内心忧伤无力而又茫然不知所措的人用键盘敲打再无用不过字眼的时候。每种情绪都是不同的情绪，每种情绪都是同一种情绪。他们弥漫开来，就像不久前的举国哀悼一样，不知不觉就有种身临其境的感受。&lt;/p&gt;
+
+&lt;p&gt;凡此种种的看似无法忍受却被每个人都理所当然的忍受着的事，我是说比如新闻里所有的流氓事件。好像只有有力量的人才能真正的在这个世界做一个类似于大写的人这样的笑话。谁说的，『人要活的有尊严，不但要钱，有时还需要一把枪！』非暴力被暴力终结了，我有一个梦很久也仍然更久的将只是一个梦。但这不是生活的所有面，它只是生活得一面，甚至只是很小的一面，却摧毁者许多人的价值与良心。&lt;/p&gt;
+
+&lt;p&gt;但是，我们只不过是自以为手握真理却愚笨到极点的又一群受害者罢了，优渥的人有着他们的价值及欲望以及随之而来的安之若素，卑贱的人则如我们朝着某些空洞的地方放出再无回音的响声。你丢下的每一种情绪，愤怒、失望、悲伤，乃至死亡，从来就不会也不应有人回应。所以你可以选择一而再再而三的失望，最后逃避，远远地逃开，要么消失。或者在生活中做一个苦难受尽而一再降低底线的人，体验各种各样敏感的人会为之无比痛苦和忧伤的种种，再叹一声气，希望某一天生活会露出另一丝光彩，让你摇身一变去揍人。&lt;/p&gt;
+
+&lt;p&gt;绕开很远后回来我想说，不要消极，不要说消极的话，不要被任何人用消极的东西让你觉得消极，这个世界不理想，也不是不理想，只不过如果真的想要改变，应该用与之相反的情绪去改变。否则，那样的改变只会把自己树立成矛盾体，并充斥又一次的肮脏与混乱。&lt;/p&gt;
+
+&lt;p&gt;没有人也没有一种信仰是不破的底线。于是我想起有人说过，『人们啊，我爱你们。但你们可要小心啊！』&lt;/p&gt;
+</description>
+        <pubDate>Sat, 21 Aug 2010 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2010/08/all-that-is/</link>
+        <guid isPermaLink="true">http://kanedou.me/2010/08/all-that-is/</guid>
+      </item>
+    
+      <item>
+        <title>停</title>
+        <description>&lt;p&gt;有人对着冰凉毫无热情的屏幕敲出一个个字眼，有人看着抬头看着天空低头望向海洋嘴中渐渐喷出许多声音，也有人触摸身边的或悲或喜无法被传递饱受伤害的人们自顾自叹气。&lt;/p&gt;
+
+&lt;p&gt;我却还没有想到接下来的沉默尴尬要持续到何时。&lt;/p&gt;
+
+&lt;p&gt;有一些人在需要不断向前走的生活道路上难免停下，磕磕绊绊，前后瞻顾，寻找一些牢靠的，值得信仰的东西，然后再前进。有些人，则永远停下了，但却没有死去，他们停下了，再不考虑今后生活的一切需要费神痛苦的事情，他们解脱了。&lt;/p&gt;
+
+&lt;p&gt;难免，有时，每个人都想做后者。即使嘴硬着不肯承认什么，但从此以后，他的一生——哈，他的一生——就像被写进书中了一样，凝固了，不再渴望、不再贪婪、不再像过去一样地每日每夜受到什么东西的折磨。悲伤停止了，快乐停止了，纵然这一切看上去依然毫无变化。&lt;/p&gt;
+
+&lt;p&gt;于是有一天，他——或者你——穿着从未穿过的衣服裤子兴奋或失望着踏进了从未踏进过的高楼小屋，在一个狭小的角落，开始生命中的又一天，又三天。日子如此积累着，直到再没有人会来打扰了，直到他明白生活如斯，知足常乐了，直到他已子孙满堂，夫复何求了。这就是一种我们所说的这就是生活，或者，C'est la vie的样子。从而，生活并不是什么在别处另有天地的颠沛流离的图画，一个人，一双脚，在某些路途上来回奔走无数次，一双眼一张口，与许多熟悉不过的脸孔相视无言，一双手，触碰过别人、不断叉起、拒绝人、握紧又打掉的手。同样的生活不会再就这么毫无怨言地继续存在了，就像，同样的人也从来不曾存在过一样，他们不是变蠢了就是变好了，或者，见不到了。&lt;/p&gt;
+
+&lt;p&gt;永恒，从不意味着改变，而改变，也永远无法直至永远。抱歉我并不是想说哲学问题，我只是坚定自己不去奢望什么永恒的改变如此不切实际的东西，即使那是优雅的，也显然那是七十年代的优雅的东西。&lt;/p&gt;
+
+&lt;p&gt;但这很难，越是希望什么，越是得不到什么，越是希望自己得不到什么，越是得不到，越是希望，没有终结。说服自己，最好的办法是不要再去希望，也就不用再去“成熟”地想得不到也无妨了。&lt;/p&gt;
+
+&lt;p&gt;然而，矛盾的人永远存在，在矛盾无法调和的状态里，一步一步从始至末，沿着一条不知从何处借来的道路往前行走，他以为自己很清醒，但其实却被一些东西弄得迷幻了起来，当然，不是积极的迷幻，而是毫无创造力的迷幻，就像一直告诫自己的清醒话语突然变得模糊而烦人，就像，一句完全正常的问候变成了最恶毒的侵扰，黑白彻底颠覆，但却没有丝毫的好处，只剩下荒芜和隔离，尚不会腐败，他停止进化，那么一段时间，之后或是蜕变或是...&lt;/p&gt;
+
+&lt;p&gt;三个和弦的力量早已超过诗歌，我不敢认同，虽然我很想，因为我最近才开始很喜欢听音乐。你懂那种感觉吗？那种非常糟糕的感觉，就是音乐带给人的感觉，糟糕的音乐霸占了我们耳朵很久很久，他们就用了三个和弦，然后重复重复，重复三次。所以，音乐才是改变的最初起点，不是文字，它们进入你的耳朵，你的大脑，每一次都不一样，即便是同一个音符，还是不一样。但却就是有人会把它们弄成一样的，不要再继续了，这就是最好的解决办法，因为好听是不够的，简洁和深刻才是被需要的。&lt;/p&gt;
+</description>
+        <pubDate>Fri, 09 Jul 2010 00:00:00 +0800</pubDate>
+        <link>http://kanedou.me/2010/07/ting/</link>
+        <guid isPermaLink="true">http://kanedou.me/2010/07/ting/</guid>
+      </item>
+    
+  </channel>
+</rss>
