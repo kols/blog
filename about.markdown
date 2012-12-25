@@ -1,10 +1,8 @@
 ---
 layout: page
 title: "About"
-date: 2012-06-27 02:28
+date: 2012-12-25 18:06
 comments: true
-sharing: true
-footer: true
 ---
 当我留下一些话语的时候，它们可能不久便失去意义甚至消失不见，但文字不同，它在那
 里愈是久，它所融入的生活气息也就愈多，这是因为文字会自己生长，随着你。当你爱一
