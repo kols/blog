@@ -10,18 +10,29 @@ $h3FontSize: $titleFontSize * 8 / 12;
 $h4FontSize: $titleFontSize * 7 / 12;
 $h5FontSize: $titleFontSize * 6 / 12;
 $h6FontSize: $titleFontSize * 5 / 12;
+$metaFontSize: 14px;
+$contentFontSize: 14px;
+$footerFontSize: 9px;
+$titleLineHeight: 110%;
+$contentLineHeight: 170%;
+$listLineHeight: 160%;
+
 // color
-$minorGray: #8A8A8A;
+$minorGray: #888;
+$codeColor: #777;
 $softBlackHeading: #222;
 $softBlackBody: #444;
+$softBlackCode: #666;
 $articleBackgroundColor: #F9F9F9;
+
+$containerSize: 649px;
 
 //@import "compass/reset";
 @import "compass_twitter_bootstrap";
 @import "compass/css3";
 
 @mixin link-hover-shadow {
-  @include text-shadow(0 0 2px $linkColor);
+  @include text-shadow(0 0 1px $linkColor);
 }
 
 @mixin circle {

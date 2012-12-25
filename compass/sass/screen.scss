@@ -29,14 +29,13 @@ article a, footer.contentinfo a {
   }
 }
 
-abbr {
-  font-variant: small-caps;
-  text-transform: lowercase;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-}
+abbr { font-variant: small-caps; }
+blockquote p { font-size: $contentFontSize; }
 
-code { padding: 0px 5px; }
+code {
+  padding: 0px 5px;
+  color: $codeColor;
+}
 h1, h2, h3, h4, h5, h6 {
   code {
     color: $softBlackHeading;
@@ -79,7 +78,7 @@ article {
 }
 
 div.container {
-  width: 699px;
+  width: $containerSize;
   & > header { font-family: $headerFont; }
 }
 
@@ -92,7 +91,7 @@ div#content .well {
 }
 
 article section.title {
-  line-height: 110%;
+  line-height: $titleLineHeight;
   color: $softBlackHeading;
 }
 
@@ -101,21 +100,23 @@ article section.title + section.meta {
   margin-bottom: 15px;
   color: $minorGray;
   @include opacity(0.6);
-  font-size: 14px;
+  font-size: $metaFontSize;
 }
 
 section.post, section.content {
-  font-size: 16px;
-  line-height: 170%;
+  font-size: $contentFontSize;
+  line-height: $contentLineHeight;
   color: $softBlackBody;
   h1, h2, h3, h4, h5, h6 {
     margin-top: 25px;
     margin-bottom: 25px;
   }
+  p {
+    margin-bottom: $contentFontSize * 1.1;
   }
 }
 
-article li { line-height: 160%; }
+article li { line-height: $contentLineHeight; }
 
 pre {
   @include spread-text;
@@ -147,5 +148,5 @@ footer.contentinfo {
   font-family: $footerFont;
   text-align: center;
   color: $minorGray;
-  font-size: 9px;
+  font-size: $footerFontSize;
 }
