@@ -1,0 +1,13 @@
+<div>
+  {% assign first_post = site.posts | last %}
+  {% assign last_post = site.posts | first %}
+  <span class="copy">&copy; {{ first_post.date | date: "%Y" }}-{{ last_post.date | date: "%Y" }} kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
