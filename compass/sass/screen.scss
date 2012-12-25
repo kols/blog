@@ -38,13 +38,37 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-img {
-  display: block;
-  margin: auto;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  @include border-radius(4px);
-  @include box-shadow(2px 2px 4px #eee)
+article {
+  img {
+    display: block;
+    margin: auto;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    @include border-radius(4px);
+    @include box-shadow(2px 2px 4px $minorGray);
+  }
+  img.left-wrap {
+    float: left;
+    margin-right: 15px;
+    margin-left: 5px;
+  }
+  img.right-wrap {
+    float: right;
+    margin-left: 15px;
+    margin-left: 10px;
+  }
+  img.oob {
+    max-width: $containerSize + 10px;
+    margin-left: -25px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    @include border-radius(0);
+    @include box-shadow(0 8px 4px -4px #888);
+  }
+  img.plain {
+    @include border-radius(0);
+    @include box-shadow(none);
+  }
 }
 
 div.container {
