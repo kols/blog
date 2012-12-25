@@ -2,13 +2,13 @@
 <article role="article" class="well">
   <header>
     <section class="title">
-      <h3>
+      <h1>
         {% if index %}
         <a href="{{ page.url }}">{{ page.title }}</a>
         {% else %}
         {{ page.title }}
         {% endif %}
-      </h3>
+      </h1>
     </section>
     <section class="meta">
       @<time>{{ page.date | date: "%Y-%m-%d" }}</time>

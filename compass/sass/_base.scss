@@ -3,6 +3,13 @@ $headerFont: "Droid Serif", serif;
 $bodyFont: "Source Sans Pro", "Lucida Grande", "WenQuanYi Micro Hei", "STHeiti", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif;
 $footerFont: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 
+// font size
+$titleFontSize: 24.5px;
+$h2FontSize: $titleFontSize * 10 / 12;
+$h3FontSize: $titleFontSize * 8 / 12;
+$h4FontSize: $titleFontSize * 7 / 12;
+$h5FontSize: $titleFontSize * 6 / 12;
+$h6FontSize: $titleFontSize * 5 / 12;
 // color
 $minorGray: #8A8A8A;
 $softBlackHeading: #222;
