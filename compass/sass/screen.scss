@@ -101,6 +101,7 @@ article section.title + section.meta {
   color: $minorGray;
   @include opacity(0.6);
   font-size: $metaFontSize;
+  font-family: $headerFont;
 }
 
 section.post, section.content {
