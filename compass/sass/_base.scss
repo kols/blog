@@ -27,8 +27,7 @@ $articleBackgroundColor: #F9F9F9;
 
 $containerSize: 649px;
 
-//@import "compass/reset";
-@import "compass_twitter_bootstrap";
+@import "bootstrap";
 @import "compass/css3";
 
 @mixin link-hover-shadow {
