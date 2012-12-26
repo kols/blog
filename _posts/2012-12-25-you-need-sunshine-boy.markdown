@@ -7,8 +7,8 @@ comments: true
 categories:
   - photo
 ---
-<a href="http://www.flickr.com/photos/kols/6209939019/" title="Wind by kols, on Flickr">
-  <img class="oob" src="http://farm7.staticflickr.com/6106/6209939019_45d6b7341b_b.jpg" width="1024" height="683" alt="Wind">
+<a href="http://500px.com/photo/21445079">
+  <img class="oob" src="http://pcdn.500px.net/21445079/707294c5752a8f50b583d86f5732c2e4f39a04ab/4.jpg" alt="Wind by Kane Dou (kols)) on 500px.com" />
 </a>
 
 you do need it (;
