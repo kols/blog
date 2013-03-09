@@ -1,4 +1,4 @@
-source "https://rubygems.org"
+source "http://ruby.taobao.org/"
 
 #gem 'jekyll', '>= 0.11.2'
 gem 'jekyll', :git => 'https://github.com/mojombo/jekyll'
