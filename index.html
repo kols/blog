@@ -49,31 +49,6 @@
     <section class="title">
       <h1>
         
-        <a href="/2013/03/douban-verify/">doubanclaim002fdd9aabf13c40</a>
-        
-      </h1>
-    </section>
-    <section class="meta">
-      @<time>2013-03-09</time>
-      <span class="categories">
-        
-      </span>
-    </section>
-  </header>
-  <section class="post">
-    
-
-  </section>
-</article>
-
-  
-  
-  
-<article role="article" class="well">
-  <header>
-    <section class="title">
-      <h1>
-        
         <a href="/2013/03/motion-picture-diary-i/">电影日记 I</a>
         
       </h1>
@@ -1118,6 +1093,60 @@ WordPress，则需要自定义一项 nginx 设置。</p>
 301重定向到前缀 www 的子域名，免费且不用注册，直接 A 记录指向其提供的 IP 即可。</p></li>
 </ul>
 
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        <a href="/2010/10/build-word-list-using-python/">用 Python 建英语单词表</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2010-10-31</time>
+      <span class="categories">
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>今天受到 dofine
+同学<a href="http://blog.dofine.info/2010/10/use-org-mode-to-recite-words.html">这篇文章</a>
+的启发，想到也可以用相同的办法（Org-Mode 的 Checkbox）来背平时用
+<a href="http://stardict.sourceforge.net/">Stardict</a> 记下的陌生单词，于是写了一个
+<a href="http://python.org">Python</a> 脚本来将单词整理起来，过程中使用了 Dict.CN 的
+<a href="http://dict.cn/ws.php?q=word">API接口</a> 获取单词的音标，释义以及例句。效果看图：</p>
+
+<p><a href="http://pic.yupoo.com/kols/AAxA5L5B/11io9J.png" title="owlb1"><img src="http://pic.yupoo.com/kols/AAxA5L5B/medium.jpg" alt="image" /></a></p>
+
+<!-- more -->
+
+
+<p>输入源：</p>
+
+<pre><code>delineate
+parity
+heterogeneous
+deterministic
+heterogeneous,
+Intersect
+impede
+</code></pre>
+
+<p>脚本文件这里找：<a href="http://github.com/kols/util_scripts/blob/master/owlb.py">owlb.py</a>
+，用法为输入一个纯文本单词文件（格式如上：一个单词一行），输出相应 <code>.org</code> 文件，
+具体请看 <code>python owlb.py --help</code>。</p>
+
+<p><em>2010/11/05 Updated：</em>现在脚本可以在原有单词列表上附加新单词，不会重复，只要将原列表作为输出文件即可。</p>
+
+<p><em>2011/03/17 Updated：</em>重写后，现在的运行速度提高至原版的十倍。</p>
 
   </section>
 </article>
