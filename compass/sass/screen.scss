@@ -33,6 +33,7 @@ abbr { font-variant: small-caps; }
 blockquote p { font-size: $contentFontSize; }
 
 code {
+  font-family: "Source Code Pro", "Monaco", "Consolas", "WenQuanYi Micro Hei Mono";
   padding: 0px 5px;
   color: $codeColor;
 }
