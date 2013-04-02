@@ -519,7 +519,7 @@ class LawsonSpider(BasePoiSpider):
 真正的抓取就是通过这个命令执行的：
 
 {% highlight sh %}
-$ scrapy crawl store
+$ scrapy crawl lawson
 {% endhighlight %}
 
 {% highlight text %}
@@ -579,7 +579,7 @@ $ scrapy crawl store
 若要输出抓取结果到一个文件，则加上参数：
 
 {% highlight sh %}
-scrapy crawl store -o store.csv -t csv
+scrapy crawl lawson -o store.csv -t csv
 {% endhighlight %}
 
 
