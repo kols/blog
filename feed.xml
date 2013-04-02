@@ -642,7 +642,7 @@ Use &amp;quot;scrapy &amp;lt;command&amp;gt; -h&amp;quot; to see more info about
 
 &lt;p&gt;真正的抓取就是通过这个命令执行的：&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;scrapy crawl store
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;scrapy crawl lawson
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
@@ -704,7 +704,7 @@ Use &amp;quot;scrapy &amp;lt;command&amp;gt; -h&amp;quot; to see more info about
 
 &lt;p&gt;若要输出抓取结果到一个文件，则加上参数：&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;scrapy crawl store -o store.csv -t csv
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;sh&quot;&gt;scrapy crawl lawson -o store.csv -t csv
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
