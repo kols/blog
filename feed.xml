@@ -7,6 +7,180 @@
     <atom:link href="http://kanedou.me/feed.xml" rel="self" type="application/rss+xml" />
     
       <item>
+        <title>go composition</title>
+        <description>&lt;p&gt;go 没有 inheritance，只有基于 interface 的 composition，但它提供了类似继承的 embedding 来使这一过程尽可能简洁。这里就用具体示例来说一下如何做。&lt;/p&gt;
+
+&lt;p&gt;假设我需要两个图片 URL 生成器，它能根据 http 请求来源生成相应的图片 URL 集合，例如从 mobile 来的请求我为其生成 original, cover 两个 URL，而从 desktop 来的请求则生成 original, preview 和 thumbnail 三个 URL。&lt;/p&gt;
+
+&lt;p&gt;整理一下需求：首先是 original, cover, preview 及 thumbnail 这四个基础的实际生成 URL 的生成器，然后是 mobile 及 desktop 这两个构筑在前四者之上的抽象分类。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;go&quot;&gt;&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;OriginalUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;OriginalUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CoverUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;PreviewUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;PreviewUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ThumbnailUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;ThumbnailUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这里我们先声明了四种不同 URL 的 interface，这是为了之后的 composition 更方便。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;go&quot;&gt;&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;OriginalUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;OriginalUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Original&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Image&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// a model, the source we use to generate the URL, just a stab to complete the logic, pay no attention to it.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;o&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Original&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;OriginalUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// generate original URL}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CoverUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Cover&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Image&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Cover&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// generate cover URL}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;PreviewUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;PreviewUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Preview&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Image&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Preview&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;PreviewUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// generate preview URL}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ThumbnailUrlBuilder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;ThumbnailUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Thumbnail&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Image&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Thumbnail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ThumbnailUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// generate thumbnail URL}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;声明各个具体的 builder 并实现 interface。接下来是两个分类。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;go&quot;&gt;&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Desktop&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Original&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Preview&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Thumbnail&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Mobile&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Original&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Cover&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这里的实现使用了 struct embedding，这里内嵌了基础 builder 的 pointer，效果是直接将内嵌 struct 的所有 method 带入新声明的 struct。这里有几点需要注意：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;内嵌的 struct 需要 initialize&lt;/li&gt;
+&lt;li&gt;在所声明 struct 上调用内嵌 struct 的 method 时其 receiver 为内嵌的 struct 而非其自身：&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;go&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// when we call embedded method directly on the outer struct&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// it&amp;#39;s exactly like first defining this book-keeping method on the outer struct and then calling it&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Desktop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Cover&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// receiver is `Cover&amp;#39; not `Desktop&amp;#39;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;内嵌 struct 的 field name 为其 unqualified name，即去除 package name 后的部分。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://golang.org/doc/effective_go.html#embedding&quot;&gt;http://golang.org/doc/effective_go.html#embedding&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;之后看一下如何实际使用这些 URL builder。&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;go&quot;&gt;&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;GetUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reqType&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{})&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Image&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;switch&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;reqType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;desktop&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;o&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Original&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Preview&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Thumbnail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Desktop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;mobile&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;o&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Original&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Cover&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Mobile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;panic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Oooops, don&amp;#39;t know which type it is!&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;reqType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;GetRequestTypeFromNowhere&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// fake&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;urlBuilder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;GetUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reqType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;switch&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;reqType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;desktop&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;urlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;OriginalUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;OriginalUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// original URL&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;urlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;PreviewUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;PreviewUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// preview URL&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;urlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ThumbnailUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ThumbnailUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// thumbnail URL&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;mobile&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;urlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;OriginalUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;OriginalUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// original URL&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;urlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CoverUrlBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CoverUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// cover URL&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;GetUrlBuilder()&lt;/code&gt; 返回 &lt;code&gt;interface{}&lt;/code&gt;，即使用者不知道所返回的究竟是 &lt;code&gt;Desktop&lt;/code&gt; 还是 &lt;code&gt;Mobile&lt;/code&gt;。因为使用者只需负责使用就可以了，&lt;code&gt;desktop.(PreviewUrlBuilder).PreviewUrl()&lt;/code&gt; 对所返回的 builder 先进行 type assertion 再调用相应 interface 中的方法，即我需要一个 preview URL 则我就调用 &lt;code&gt;PreviewUrlBuilder&lt;/code&gt; 中的 &lt;code&gt;PreviewUrl()&lt;/code&gt; 方法来获取这样一个 URL，除此以外我不需要知道其他任何信息，builder 的种类为何对使用者而言是透明的。而这也是最初声明四个不同基础 builder 的 interface 的好处之一。&lt;/p&gt;
+
+&lt;p&gt;最后总结一下这样的程序结构的优点：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;方便新增抽象分类，例如 &lt;code&gt;PadImageUrlBuilder&lt;/code&gt;，使用基础的 builder 组合一下即可。&lt;/li&gt;
+&lt;li&gt;可根据需要实现多个同种基础 builder，只需实现其 interface 即可，在多个 builder 之间动态替换也没问题。&lt;/li&gt;
+&lt;li&gt;新增基础 builder 也很容易，声明 interface 并实现，然后在抽象分类中将其 embed 进去即可。&lt;/li&gt;
+&lt;li&gt;抽象分类对 builder 使用者完全透明，其只需 &lt;code&gt;GetUrlBuilder()&lt;/code&gt; 后根据实际需要 type assertion 至相应基础 builder 并调用其方法即可，不需知道这是 desktop 还是 mobile builder。&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;go 应用了这两条面向对象设计原则：&lt;/p&gt;
+
+&lt;blockquote&gt;&lt;ul&gt;
+&lt;li&gt;Favor composition over inheritance.&lt;/li&gt;
+&lt;li&gt;Program to an interface, not an implementation.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;因此其虽非面向对象语言但是仍然有面向对象的痕迹，只是摒弃了设计者所不中意的部分（inheritance），并强调了他们喜欢的地方。在 go 中实现一个设计模式并非水到渠成的，但它所提供的概念及抽象总是在引导你试着去运用，明确地或是潜移默化地。&lt;/p&gt;
+
+&lt;p&gt;go 是给人一种相当朴素感觉的语言，当现代语言都在追求各种各样花哨形式（以给程序员提供乐趣，当然也确实很有乐趣）的时候，它仍以一种质朴平淡甚至近乎无聊的形式呈现自己，给你它所为你选择的它所认为重要的，显然漂亮的语法或 syntax sugar 并不在列，然而它居然也是有乐趣的，从少获得多，less is more，这也是另一种我所欣赏的审美态度。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 14 Apr 2013 16:47:00 +0800</pubDate>
+        <link>http://kanedou.me/2013/04/go-composition/</link>
+        <guid isPermaLink="true">http://kanedou.me/2013/04/go-composition/</guid>
+      </item>
+    
+      <item>
         <title>『Bioshock Infinite』带来的</title>
         <description>&lt;p&gt;&lt;img src=&quot;http://pic.yupoo.com/kols_v/CJWMsjZA/medium.jpg&quot; alt=&quot;Bioshock Infinite&quot; /&gt;&lt;/p&gt;
 
@@ -1219,43 +1393,6 @@ ServerAliveInterval 60
         <pubDate>Thu, 30 Sep 2010 00:00:00 +0800</pubDate>
         <link>http://kanedou.me/2010/09/gentoo-ssh-proxy-initscript/</link>
         <guid isPermaLink="true">http://kanedou.me/2010/09/gentoo-ssh-proxy-initscript/</guid>
-      </item>
-    
-      <item>
-        <title>九月</title>
-        <description>&lt;p&gt;这个月又要过去了，我现在的作文频率已降至历史低点，正是与房价相反，跟股市接轨。&lt;/p&gt;
-
-&lt;p&gt;月初干了些什么真的倒还不太记得了，更不要说有人问我六个月前写的那些得得瑟瑟的都是什么了，我更说不上来。这样吧，咱倒着写，可能有助于恢复记忆。&lt;/p&gt;
-
-&lt;p&gt;今天除了继续研究Gentoo以外还研究了一下怎么才能让 &lt;em&gt;Dead Rising 2&lt;/em&gt; 这个游戏能不这么卡，怎么卡？就是一会儿像幻灯片一会儿像幻灯片那么卡，但他不总是像幻灯片，所以我错以为这是像希望一样的那种东西。于是在本来可以植物大战僵尸的时候，我不得不去研究怎么让僵尸变漂亮变得不那么卡而奋斗，但结果是让人沮丧的，在我一遍遍以开场白的肢解僵尸作为卡还是不卡的测试之后，除了显卡和CPU有烧焦的倾向外一切都没有改变，不论我是超频还是装驱动，又或者寄希望于Win7的最新火星科技。既然这样我就不得不承认，很多东西我必须得对它说不……&lt;/p&gt;
-
-&lt;p&gt;这必须是一个bug！但是，噢，说到bug，今天我也遇到了不止一个，虽然不总是跟僵尸有关，但这个bug还是有些用的，对某些人来说。&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-
-&lt;p&gt;&lt;a href=&quot;https://launchpad.net/notify-osd&quot;&gt;notify-osd&lt;/a&gt;是Ubuntu的一个桌面通知程序，很漂亮、很优雅，但是gentoo里没有它，于是只能自己编译一个来用，这些不是问题，问题是pidgin，它有个pidgin-libnotify的插件是可以与notify-osd打交道的，然后把聊天信息以那种很漂亮、很优雅的方式通知给我，但是从Gentoo自己的软件库里安装的这个插件是有点小问题以至于notify-osd无法跟它很好沟通，从而本来美观的通知变成了…厄…对话框……这是个大问题。&lt;/p&gt;
-
-&lt;p&gt;于是找Google帮忙，很快地在Debian的bugzilla发现了有关这个问题的&lt;a href=&quot;http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=549265#40&quot;&gt;补丁&lt;/a&gt;，打上补丁后重新编译安装pidgin-libnotify。这样一来本来的丑陋对话框就又变成了好看的通知信息。&lt;/p&gt;
-
-&lt;p&gt;既然测试成功，并且这个补丁似乎也已经被Debian接受，Gentoo用户应该也可以享受到，于是去到Gentoo的bugzilla提交了&lt;a href=&quot;http://bugs.gentoo.org/show_bug.cgi?id=338927&quot;&gt;这个建议&lt;/a&gt;。
-事情也就是这样。&lt;/p&gt;
-
-&lt;p&gt;前不久又去了世博会，是第二次去，依然是热辣的太阳和满头满脸的人群。但这次还算有效率，走遍了欧洲非洲，还轮渡到了浦西，各个国家大大小小的馆去了也有十几个，是和一个每次qq都会发笑脸过来却被我扔炸弹回去仍然百折不挠的家伙一起的。&lt;/p&gt;
-
-&lt;p&gt;班级聚会聚不起，寝室聚会也聚不起，每位工作了的都是麻烦一身，养家糊口就是这样忙，因此这个样子应该还算正常。&lt;/p&gt;
-
-&lt;p&gt;月中似乎是在新装Gentoo的阶段，各种编译、各种文档消耗了大量时间，但借此机会也认认真真地调整了一回Kernel，于是所谓&lt;em&gt;2.6.34-gentoo-r6-r50e-dt-bb-r1&lt;/em&gt;的Kernel就以这样超长（也超囧？）的代号登场了，备份了config，也做好Todo和ChangeLog。对了，顺便一问，有人知道与Thinkpad的Trackpoint相关Kernel选项是哪一个吗？请不吝赐教。&lt;/p&gt;
-
-&lt;p&gt;月初则是在写python，主要是同步校内头像到Google Contacts的脚本，起因是看着我的G1通讯录里一个个机器人头像不太爽。基本做通了，可用，接下来就是把事情搞复杂，塞一些外星人也用不到的功能进去，加点彩蛋……过程中不满意的自然是校内那边的数据接口了，只提供Web程序的认证接口而不提供一般的Basic Auth让这个脚本的实现有些…奇怪……&lt;/p&gt;
-
-&lt;p&gt;写到这我得说我用的这个方法真是有效，一下子帮我把很多事情都给写出来了，虽然想像中应该没做多少事，但实际则是似乎还有些成果。&lt;/p&gt;
-
-&lt;p&gt;继续吧，今天则到此为止。&lt;/p&gt;
-</description>
-        <pubDate>Mon, 27 Sep 2010 00:00:00 +0800</pubDate>
-        <link>http://kanedou.me/2010/09/the-september/</link>
-        <guid isPermaLink="true">http://kanedou.me/2010/09/the-september/</guid>
       </item>
     
   </channel>

@@ -49,6 +49,200 @@
     <section class="title">
       <h1>
         
+        <a href="/2013/04/go-composition/">go composition</a>
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2013-04-14</time>
+      <span class="categories">
+        
+        <em class="category">#programming</em>
+        
+        <em class="category">#go</em>
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>go 没有 inheritance，只有基于 interface 的 composition，但它提供了类似继承的 embedding 来使这一过程尽可能简洁。这里就用具体示例来说一下如何做。</p>
+
+<p>假设我需要两个图片 URL 生成器，它能根据 http 请求来源生成相应的图片 URL 集合，例如从 mobile 来的请求我为其生成 original, cover 两个 URL，而从 desktop 来的请求则生成 original, preview 和 thumbnail 三个 URL。</p>
+
+<p>整理一下需求：首先是 original, cover, preview 及 thumbnail 这四个基础的实际生成 URL 的生成器，然后是 mobile 及 desktop 这两个构筑在前四者之上的抽象分类。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">OriginalUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CoverUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PreviewUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ThumbnailUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>这里我们先声明了四种不同 URL 的 interface，这是为了之后的 composition 更方便。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">OriginalUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Original</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>  <span class="c1">// a model, the source we use to generate the URL, just a stab to complete the logic, pay no attention to it.</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">o</span> <span class="nx">Original</span><span class="p">)</span> <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate original URL}</span>
+
+<span class="kd">type</span> <span class="nx">CoverUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Cover</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="nx">Cover</span><span class="p">)</span> <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate cover URL}</span>
+
+<span class="kd">type</span> <span class="nx">PreviewUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Preview</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Preview</span><span class="p">)</span> <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate preview URL}</span>
+
+<span class="kd">type</span> <span class="nx">ThumbnailUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Thumbnail</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="nx">Thumbnail</span><span class="p">)</span> <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate thumbnail URL}</span>
+</code></pre></div>
+
+
+<p>声明各个具体的 builder 并实现 interface。接下来是两个分类。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">Desktop</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="o">*</span><span class="nx">Original</span>
+    <span class="o">*</span><span class="nx">Preview</span>
+    <span class="o">*</span><span class="nx">Thumbnail</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Mobile</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="o">*</span><span class="nx">Original</span>
+    <span class="o">*</span><span class="nx">Cover</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>这里的实现使用了 struct embedding，这里内嵌了基础 builder 的 pointer，效果是直接将内嵌 struct 的所有 method 带入新声明的 struct。这里有几点需要注意：</p>
+
+<ul>
+<li>内嵌的 struct 需要 initialize</li>
+<li>在所声明 struct 上调用内嵌 struct 的 method 时其 receiver 为内嵌的 struct 而非其自身：</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="go"><span class="c1">// when we call embedded method directly on the outer struct</span>
+<span class="nx">d</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>
+<span class="c1">// it&#39;s exactly like first defining this book-keeping method on the outer struct and then calling it</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">d</span> <span class="nx">Desktop</span><span class="p">)</span> <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="nx">d</span><span class="p">.</span><span class="nx">Cover</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>  <span class="c1">// receiver is `Cover&#39; not `Desktop&#39;</span>
+<span class="p">}</span>
+<span class="nx">d</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>
+</code></pre></div>
+
+
+<ul>
+<li>内嵌 struct 的 field name 为其 unqualified name，即去除 package name 后的部分。</li>
+<li><a href="http://golang.org/doc/effective_go.html#embedding">http://golang.org/doc/effective_go.html#embedding</a></li>
+</ul>
+
+
+<p>之后看一下如何实际使用这些 URL builder。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">func</span> <span class="nx">GetUrlBuilder</span><span class="p">(</span><span class="nx">reqType</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="nx">builder</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+    <span class="k">switch</span> <span class="nx">reqType</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="s">&quot;desktop&quot;</span><span class="p">:</span>
+        <span class="nx">o</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Original</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">p</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Preview</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">t</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Thumbnail</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">builder</span> <span class="p">=</span> <span class="nx">Desktop</span><span class="p">{</span><span class="nx">o</span><span class="p">,</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">t</span><span class="p">}</span>
+    <span class="k">case</span> <span class="s">&quot;mobile&quot;</span><span class="p">:</span>
+        <span class="nx">o</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Original</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">c</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Cover</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">builder</span> <span class="p">=</span> <span class="nx">Mobile</span><span class="p">{</span><span class="nx">o</span><span class="p">,</span> <span class="nx">c</span><span class="p">}</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="nb">panic</span><span class="p">(</span><span class="s">&quot;Oooops, don&#39;t know which type it is!&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">reqType</span> <span class="o">:=</span> <span class="nx">GetRequestTypeFromNowhere</span><span class="p">()</span>  <span class="c1">// fake</span>
+    <span class="nx">urlBuilder</span> <span class="o">:=</span> <span class="nx">GetUrlBuilder</span><span class="p">(</span><span class="nx">reqType</span><span class="p">)</span>
+    <span class="k">switch</span> <span class="nx">reqType</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="s">&quot;desktop&quot;</span><span class="p">:</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">OriginalUrlBuilder</span><span class="p">).</span><span class="nx">OriginalUrl</span><span class="p">()</span>  <span class="c1">// original URL</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">PreviewUrlBuilder</span><span class="p">).</span><span class="nx">PreviewUrl</span><span class="p">()</span>  <span class="c1">// preview URL</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">ThumbnailUrlBuilder</span><span class="p">).</span><span class="nx">ThumbnailUrl</span><span class="p">()</span>  <span class="c1">// thumbnail URL</span>
+    <span class="k">case</span> <span class="s">&quot;mobile&quot;</span><span class="p">:</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">OriginalUrlBuilder</span><span class="p">).</span><span class="nx">OriginalUrl</span><span class="p">()</span>  <span class="c1">// original URL</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">CoverUrlBuilder</span><span class="p">).</span><span class="nx">CoverUrl</span><span class="p">()</span>  <span class="c1">// cover URL</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p><code>GetUrlBuilder()</code> 返回 <code>interface{}</code>，即使用者不知道所返回的究竟是 <code>Desktop</code> 还是 <code>Mobile</code>。因为使用者只需负责使用就可以了，<code>desktop.(PreviewUrlBuilder).PreviewUrl()</code> 对所返回的 builder 先进行 type assertion 再调用相应 interface 中的方法，即我需要一个 preview URL 则我就调用 <code>PreviewUrlBuilder</code> 中的 <code>PreviewUrl()</code> 方法来获取这样一个 URL，除此以外我不需要知道其他任何信息，builder 的种类为何对使用者而言是透明的。而这也是最初声明四个不同基础 builder 的 interface 的好处之一。</p>
+
+<p>最后总结一下这样的程序结构的优点：</p>
+
+<ul>
+<li>方便新增抽象分类，例如 <code>PadImageUrlBuilder</code>，使用基础的 builder 组合一下即可。</li>
+<li>可根据需要实现多个同种基础 builder，只需实现其 interface 即可，在多个 builder 之间动态替换也没问题。</li>
+<li>新增基础 builder 也很容易，声明 interface 并实现，然后在抽象分类中将其 embed 进去即可。</li>
+<li>抽象分类对 builder 使用者完全透明，其只需 <code>GetUrlBuilder()</code> 后根据实际需要 type assertion 至相应基础 builder 并调用其方法即可，不需知道这是 desktop 还是 mobile builder。</li>
+</ul>
+
+
+<p>go 应用了这两条面向对象设计原则：</p>
+
+<blockquote><ul>
+<li>Favor composition over inheritance.</li>
+<li>Program to an interface, not an implementation.</li>
+</ul>
+</blockquote>
+
+<p>因此其虽非面向对象语言但是仍然有面向对象的痕迹，只是摒弃了设计者所不中意的部分（inheritance），并强调了他们喜欢的地方。在 go 中实现一个设计模式并非水到渠成的，但它所提供的概念及抽象总是在引导你试着去运用，明确地或是潜移默化地。</p>
+
+<p>go 是给人一种相当朴素感觉的语言，当现代语言都在追求各种各样花哨形式（以给程序员提供乐趣，当然也确实很有乐趣）的时候，它仍以一种质朴平淡甚至近乎无聊的形式呈现自己，给你它所为你选择的它所认为重要的，显然漂亮的语法或 syntax sugar 并不在列，然而它居然也是有乐趣的，从少获得多，less is more，这也是另一种我所欣赏的审美态度。</p>
+
+  </section>
+</article>
+
+  
+  
+  
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
         <a href="/2013/03/bioshock-infinite-brought-along/">『Bioshock Infinite』带来的</a>
         
       </h1>
@@ -965,171 +1159,6 @@ alt="Finder" /></p>
 <p>打开 Time Machine，看到配置好的硬盘，选择即可</p>
 
 <p><img class="plain" src="http://pic.yupoo.com/kols_v/C4pgfQEP/15D4b1.png" alt="Time Machine" /></p>
-
-  </section>
-</article>
-
-  
-  
-  
-<article role="article" class="well">
-  <header>
-    <section class="title">
-      <h1>
-        
-        <a href="/2011/07/wordpress-dotcloud/">WordPress on dotCloud</a>
-        
-      </h1>
-    </section>
-    <section class="meta">
-      @<time>2011-07-01</time>
-      <span class="categories">
-        
-      </span>
-    </section>
-  </header>
-  <section class="post">
-    <p><a href="http://dotcloud.com">dotCloud</a> 是一个平台，或者是一个有人代为管理的服务器。它的主要用途是让人们免费的发布自己的
-Web 应用，并且在其之上省去了管理服务器的工作，也就省去了相当的繁琐，使得发布应用更快速方便，并且使得 Developer
-专注于应用，而不用为发布操太多心。想想那些名字，apache、nginx、php-fpm、uwsgi、SSL
-等等等等，各种各样的各不相同的设置与调试只会让人觉得麻烦、不轻松，虽然这其中也有知识。 然而 dotCloud 的应用发布则相当简单：
-（dotcloud 的 python
-客户端安装及命令行基本使用方法请参考<a href="https://docs.dotcloud.com/">官方文档</a>，很简单。）</p>
-
-<!-- more -->
-
-
-<ol>
-<li><p>新建 namespace。</p>
-
-<pre><code>$ dotcloud create kdblue
-</code></pre></li>
-<li><p>建立 Build File。</p>
-
-<pre><code>dotcloud.yml:
-
-www:
-  approot: blog
-  type: php
-  instances: 3
-db:
-  type: mysql
-</code></pre>
-
-<ul>
-<li><code>www</code> 与 <code>db</code> 为 service 名称。</li>
-<li><code>approot</code> 指定该 service 所在的本地根目录。</li>
-<li><code>type</code> 指定应用类型（语言、服务器）。</li>
-<li><code>instances</code> 设置进程数，若是 php 应用则会启动相应数量的 php-fpm 进程。</li>
-</ul>
-</li>
-<li><p>将设置推送至服务器。</p>
-
-<pre><code>$ dotcloud push kdblue .
-</code></pre></li>
-</ol>
-
-
-<p>这样，一个名为 Build File 的 <code>dotcloud.yml</code> 文件就完成了所有服务器端的设置，简单并且轻量。 接下来的工作就是
-WordPress
-的自身设置，根据<a href="http://codex.wordpress.org/Installing_WordPress#Famous_5-Minute_Install">著名的5分钟安装</a>教程教我们的：</p>
-
-<ol>
-<li>搞到 WordPress。</li>
-<li><p>在服务器上搞定数据库设置。</p>
-
-<ol>
-<li><p>首先获取 mysql 数据库密码及地址。</p>
-
-<pre><code>$ dotcloud info kdblue.db
-build_revision: rsync-1309344965.25
-cluster: wolverine
-config:
-    hostname: kdblue-default-blog-db-0
-    mysql_password: tpKsNbSjxXlb7I8DM3RH
-created_at: 1309267100.7312429
-ports:
--   name: ssh
-    url: tcp://53e93k2c.dotcloud.com:9219
--   name: mysql
-    url: tcp://53e93k2c.dotcloud.com:9220
-state: running
-type: mysql
-</code></pre></li>
-<li><p>登录并创建 WordPress 用数据库。</p>
-
-<pre><code>$ dotcloud run kdblue.db -- mysql -u root -ptpKsNbSjxXlb7I8DM3RH
-(Below in mysql shell)
-&gt; create user 'dql' identified by 'password';
-&gt; create database wordpress;
-&gt; grant all on wordpress.* to 'dql'@'%'
-  identified by 'password';
-&gt; flush privileges;
-</code></pre></li>
-</ol>
-</li>
-<li><p>重命名 <code>wp-config-sample.php</code> 为 <code>wp-config.php</code>。</p></li>
-<li><p>修改 <code>wp-config.php</code> 中的数据库设置。</p>
-
-<pre><code>define('DB_NAME', 'blog');
-define('DB_USER', 'dql');
-define('DB_PASSWORD', 'password');
-define('DB_HOST', '53e93k2c.dotcloud.com:9220');
-</code></pre></li>
-<li><p>确认一下文件树结构。</p>
-
-<pre><code>  myapp/
-  |- dotcloud.yml
-  |_ blog/
-     |_ wordpress/
-         |_ wp-config.php
-         |_ wp-contents/
-         |_ ...
-</code></pre></li>
-<li><p>将设置完毕的 WordPress 推送至服务器并重启进程。</p>
-
-<pre><code>$ dotcloud push kdblue .
-$ dotcloud restart kdblue.www
-</code></pre>
-
-<p>至此 WordPress 便部署成功，访问
-<code>http://53e93k2c.dotcloud.com/wordpress/wp-admin/install</code> 即可完成安装。</p></li>
-<li><p>有域名的可以设置自定义域名，并按说明更改相应 DNS 设置。</p>
-
-<pre><code>$ dotcloud alias add kdblue.www www.example.com
-</code></pre></li>
-</ol>
-
-
-<p>之后是一些有用的 Tip。</p>
-
-<ul>
-<li><p>因为每次 <code>push</code> 都会将服务器端的更改删除（例如安装插件），因此可以使用一个 Post-Install Hook 来避免。</p>
-
-<pre><code>#!/bin/sh
-if [ -d ~/data/wp-content ]
-then
-      rm -rf ~/current/wordpress/wp-content
-else
-      mkdir -p ~/data
-      mv ~/current/wordpress/wp-content ~/data/wp-content
-fi
-ln -s ~/data/wp-content ~/current/wordpress/wp-content
-</code></pre>
-
-<p>将此文件命名为 <code>postinstall</code> 加上执行权限后放在 <code>approot</code> 目录下，这样每次 <code>push</code>
-后之前网页端所做的更改都会保留。（但升级 WordPress 本体似乎必须在本地执行后推送）</p></li>
-<li><p>若要直接在域名处（<code>www.example.com</code>）而非子目录处（<code>www.example.com/wordpress</code>）显示
-WordPress，则需要自定义一项 nginx 设置。</p>
-
-<pre><code>try_files $uri $uri/ /index.php;
-</code></pre>
-
-<p>保存为 <code>nginx.conf</code> 后放在 <code>approot</code> 目录中。</p></li>
-<li><p><a href="http://www.wwwizer.com/">wwwizer</a> 可以免费将 dotcloud 不支持的 naked domain
-301重定向到前缀 www 的子域名，免费且不用注册，直接 A 记录指向其提供的 IP 即可。</p></li>
-</ul>
-
 
   </section>
 </article>

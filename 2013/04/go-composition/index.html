@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="author" content="Kane Dou">
+<link rel="shortcut icon" href="/favicon.ico">
+<link href="/feed.xml" rel="alternate" title="kandou.me" type="application/rss+xml">
+<link rel="stylesheet" href="/assets/stylesheets/screen.css" />
+<link rel="stylesheet" href="/assets/stylesheets/syntax.css" />
+<title>
+  go composition | kanedou.me
+</title>
+
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="row">
+          <section class="site-name">
+            <div class="span2">
+              <h1><a href="/">kanedou.me</a></h1>
+            </div>
+          </section>
+          <section class="nav">
+            <div class="span4">
+              <nav role="navigation">
+  <ul class="nav nav-pills">
+    <li><a href="/archive.html">archive</a></li>
+    <li><a href="/links.html">links</a></li>
+    <li><a href="/about.html">about</a></li>
+    <li><a href="/feed.xml">feed</a></li>
+  </ul>
+</nav>
+
+            </div>
+          </section>
+        </div>
+      </header>
+      <div id="content">
+        
+<article role="article" class="well">
+  <header>
+    <section class="title">
+      <h1>
+        
+        go composition
+        
+      </h1>
+    </section>
+    <section class="meta">
+      @<time>2013-04-14</time>
+      <span class="categories">
+        
+        <em class="category">#programming</em>
+        
+        <em class="category">#go</em>
+        
+      </span>
+    </section>
+  </header>
+  <section class="post">
+    <p>go 没有 inheritance，只有基于 interface 的 composition，但它提供了类似继承的 embedding 来使这一过程尽可能简洁。这里就用具体示例来说一下如何做。</p>
+
+<p>假设我需要两个图片 URL 生成器，它能根据 http 请求来源生成相应的图片 URL 集合，例如从 mobile 来的请求我为其生成 original, cover 两个 URL，而从 desktop 来的请求则生成 original, preview 和 thumbnail 三个 URL。</p>
+
+<p>整理一下需求：首先是 original, cover, preview 及 thumbnail 这四个基础的实际生成 URL 的生成器，然后是 mobile 及 desktop 这两个构筑在前四者之上的抽象分类。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">OriginalUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CoverUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PreviewUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ThumbnailUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>这里我们先声明了四种不同 URL 的 interface，这是为了之后的 composition 更方便。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">OriginalUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Original</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>  <span class="c1">// a model, the source we use to generate the URL, just a stab to complete the logic, pay no attention to it.</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">o</span> <span class="nx">Original</span><span class="p">)</span> <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate original URL}</span>
+
+<span class="kd">type</span> <span class="nx">CoverUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Cover</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="nx">Cover</span><span class="p">)</span> <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate cover URL}</span>
+
+<span class="kd">type</span> <span class="nx">PreviewUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Preview</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Preview</span><span class="p">)</span> <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate preview URL}</span>
+
+<span class="kd">type</span> <span class="nx">ThumbnailUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Thumbnail</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="nx">Thumbnail</span><span class="p">)</span> <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate thumbnail URL}</span>
+</code></pre></div>
+
+
+<p>声明各个具体的 builder 并实现 interface。接下来是两个分类。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">Desktop</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="o">*</span><span class="nx">Original</span>
+    <span class="o">*</span><span class="nx">Preview</span>
+    <span class="o">*</span><span class="nx">Thumbnail</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Mobile</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="o">*</span><span class="nx">Original</span>
+    <span class="o">*</span><span class="nx">Cover</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>这里的实现使用了 struct embedding，这里内嵌了基础 builder 的 pointer，效果是直接将内嵌 struct 的所有 method 带入新声明的 struct。这里有几点需要注意：</p>
+
+<ul>
+<li>内嵌的 struct 需要 initialize</li>
+<li>在所声明 struct 上调用内嵌 struct 的 method 时其 receiver 为内嵌的 struct 而非其自身：</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="go"><span class="c1">// when we call embedded method directly on the outer struct</span>
+<span class="nx">d</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>
+<span class="c1">// it&#39;s exactly like first defining this book-keeping method on the outer struct and then calling it</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">d</span> <span class="nx">Desktop</span><span class="p">)</span> <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="nx">d</span><span class="p">.</span><span class="nx">Cover</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>  <span class="c1">// receiver is `Cover&#39; not `Desktop&#39;</span>
+<span class="p">}</span>
+<span class="nx">d</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>
+</code></pre></div>
+
+
+<ul>
+<li>内嵌 struct 的 field name 为其 unqualified name，即去除 package name 后的部分。</li>
+<li><a href="http://golang.org/doc/effective_go.html#embedding">http://golang.org/doc/effective_go.html#embedding</a></li>
+</ul>
+
+
+<p>之后看一下如何实际使用这些 URL builder。</p>
+
+<div class="highlight"><pre><code class="go"><span class="kd">func</span> <span class="nx">GetUrlBuilder</span><span class="p">(</span><span class="nx">reqType</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="nx">builder</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
+    <span class="k">switch</span> <span class="nx">reqType</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="s">&quot;desktop&quot;</span><span class="p">:</span>
+        <span class="nx">o</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Original</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">p</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Preview</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">t</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Thumbnail</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">builder</span> <span class="p">=</span> <span class="nx">Desktop</span><span class="p">{</span><span class="nx">o</span><span class="p">,</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">t</span><span class="p">}</span>
+    <span class="k">case</span> <span class="s">&quot;mobile&quot;</span><span class="p">:</span>
+        <span class="nx">o</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Original</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">c</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Cover</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
+        <span class="nx">builder</span> <span class="p">=</span> <span class="nx">Mobile</span><span class="p">{</span><span class="nx">o</span><span class="p">,</span> <span class="nx">c</span><span class="p">}</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="nb">panic</span><span class="p">(</span><span class="s">&quot;Oooops, don&#39;t know which type it is!&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">reqType</span> <span class="o">:=</span> <span class="nx">GetRequestTypeFromNowhere</span><span class="p">()</span>  <span class="c1">// fake</span>
+    <span class="nx">urlBuilder</span> <span class="o">:=</span> <span class="nx">GetUrlBuilder</span><span class="p">(</span><span class="nx">reqType</span><span class="p">)</span>
+    <span class="k">switch</span> <span class="nx">reqType</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="s">&quot;desktop&quot;</span><span class="p">:</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">OriginalUrlBuilder</span><span class="p">).</span><span class="nx">OriginalUrl</span><span class="p">()</span>  <span class="c1">// original URL</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">PreviewUrlBuilder</span><span class="p">).</span><span class="nx">PreviewUrl</span><span class="p">()</span>  <span class="c1">// preview URL</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">ThumbnailUrlBuilder</span><span class="p">).</span><span class="nx">ThumbnailUrl</span><span class="p">()</span>  <span class="c1">// thumbnail URL</span>
+    <span class="k">case</span> <span class="s">&quot;mobile&quot;</span><span class="p">:</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">OriginalUrlBuilder</span><span class="p">).</span><span class="nx">OriginalUrl</span><span class="p">()</span>  <span class="c1">// original URL</span>
+        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">CoverUrlBuilder</span><span class="p">).</span><span class="nx">CoverUrl</span><span class="p">()</span>  <span class="c1">// cover URL</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p><code>GetUrlBuilder()</code> 返回 <code>interface{}</code>，即使用者不知道所返回的究竟是 <code>Desktop</code> 还是 <code>Mobile</code>。因为使用者只需负责使用就可以了，<code>desktop.(PreviewUrlBuilder).PreviewUrl()</code> 对所返回的 builder 先进行 type assertion 再调用相应 interface 中的方法，即我需要一个 preview URL 则我就调用 <code>PreviewUrlBuilder</code> 中的 <code>PreviewUrl()</code> 方法来获取这样一个 URL，除此以外我不需要知道其他任何信息，builder 的种类为何对使用者而言是透明的。而这也是最初声明四个不同基础 builder 的 interface 的好处之一。</p>
+
+<p>最后总结一下这样的程序结构的优点：</p>
+
+<ul>
+<li>方便新增抽象分类，例如 <code>PadImageUrlBuilder</code>，使用基础的 builder 组合一下即可。</li>
+<li>可根据需要实现多个同种基础 builder，只需实现其 interface 即可，在多个 builder 之间动态替换也没问题。</li>
+<li>新增基础 builder 也很容易，声明 interface 并实现，然后在抽象分类中将其 embed 进去即可。</li>
+<li>抽象分类对 builder 使用者完全透明，其只需 <code>GetUrlBuilder()</code> 后根据实际需要 type assertion 至相应基础 builder 并调用其方法即可，不需知道这是 desktop 还是 mobile builder。</li>
+</ul>
+
+
+<p>go 应用了这两条面向对象设计原则：</p>
+
+<blockquote><ul>
+<li>Favor composition over inheritance.</li>
+<li>Program to an interface, not an implementation.</li>
+</ul>
+</blockquote>
+
+<p>因此其虽非面向对象语言但是仍然有面向对象的痕迹，只是摒弃了设计者所不中意的部分（inheritance），并强调了他们喜欢的地方。在 go 中实现一个设计模式并非水到渠成的，但它所提供的概念及抽象总是在引导你试着去运用，明确地或是潜移默化地。</p>
+
+<p>go 是给人一种相当朴素感觉的语言，当现代语言都在追求各种各样花哨形式（以给程序员提供乐趣，当然也确实很有乐趣）的时候，它仍以一种质朴平淡甚至近乎无聊的形式呈现自己，给你它所为你选择的它所认为重要的，显然漂亮的语法或 syntax sugar 并不在列，然而它居然也是有乐趣的，从少获得多，less is more，这也是另一种我所欣赏的审美态度。</p>
+
+  </section>
+</article>
+
+
+<section class="comments well">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
+    var disqus_identifier = 'http://kanedou.me/2013/04/go-composition/';
+    var disqus_url = 'http://kanedou.me/2013/04/go-composition/';
+    var disqus_script = 'embed.js';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</section>
+
+
+
+      </div>
+      <footer role="contentinfo" class="contentinfo">
+        <div>
+  
+  
+  <span class="copy">&copy; 2004-2013 kane</span>
+  |
+  <span class="license">
+    <a href="http://creativecommons.org/licenses/by/3.0/cn/">license</a>
+  </span>
+  |
+  <span class="engine">
+    powered by <a href="http://jekyllrb.com/">jekyll</a> & <a href="http://compass-style.org">compass</a>
+  </span>
+</div>
+
+      </footer>
+    </div>
+  </body>
+</html>
