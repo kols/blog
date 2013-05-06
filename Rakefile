@@ -9,7 +9,7 @@ task :generate do |t, args|
   cd "compass" do
     sh "bundle exec compass compile -s compressed --force"
   end
-  sh "bundle exec jekyll"
+  sh "bundle exec jekyll build"
 end
 
 desc "Prepare deploying"
