@@ -1,0 +1,74 @@
+---
+layout: post
+title: "Flask"
+date: 2013-01-28 11:42
+comments: true
+categories:
+  - python
+  - rest
+  - api
+---
+[Flask](http://flask.pocoo.org) 是一个 Web 框架，用于快速开发网站或服务器端 API
+。在我最近的使用中，我觉得这是一个构造非常完善的框架，虽然作者称之为 micro，但
+其能实现的功能并不亚于 Django 这样的 full-stack 型框架，甚至一些设计中的巧妙之
+处更是有过之而无不及。这里就以 Flask 的 API 实际应用为例，谈谈他的优点，以求自
+明。
+
+## 环境
+
+### 安装 Flask
+
+{% highlight bash %}
+sudo pip install virtualenvwrapper
+mkvirtualenvwrapper flask-tut
+pip install Flask
+{% endhighlight %}
+
+想要更详细了解安装过程请看文档：
+[Installation](http://flask.pocoo.org/docs/installation/)
+
+### 目录结构
+
+{% highlight text %}
+.
+├── bin
+│   └── runserver_dev
+├── api
+│   ├── auth.py
+│   ├── config.py
+│   ├── constants.py
+│   ├── database.py
+│   ├── errors.py
+│   ├── helpers.py
+│   ├── __init__.py
+│   ├── log.py
+│   ├── mixins.py
+│   ├── models.py
+│   ├── serializers.py
+│   └── views.py
+└── requirements.txt
+{% endhighlight %}
+
+## 创建 Application Object
+
+[Application Object](http://flask.pocoo.org/docs/api/#application-object) 是
+是一个 <abbr title="Web Server Gateway Interface">WSGI</abbr> application 的实
+现，是 Flask 的一个核心对象，网站的构建会依赖与这个对象，因此先创建它。
+
+
+{% highlight python %}
+# api/auth.py
+from flask import Flask, make_response, Response
+
+app = Flask(__name__)
+
+class JsonResponse(Response):
+    default_mimetype = 'application/json'
+app.response_class = JsonResponse
+{% endhighlight %}
+
+因为这里所涉及的 API 都会返回 JSON，因此使用 `JsonResponse` 代替 `app` 默认的
+`response_class`，它是一个默认返回 `Content-Type: application/json` header 的
+`Response` 类。
+
+## Router
