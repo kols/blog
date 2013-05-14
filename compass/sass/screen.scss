@@ -99,9 +99,6 @@ header#masthead {
 }
 
 div.branding {
-  display: block;
-  float: left;
-  margin-left: 20px;
   & > h1 {
     font-weight: 400;
   }
@@ -202,3 +199,5 @@ footer.contentinfo {
   color: $minorGray;
   font-size: $footerFontSize;
 }
+
+@import "responsive";

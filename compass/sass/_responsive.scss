@@ -1,0 +1,58 @@
+@mixin responsive-style($ratio) {
+  h1 { font-size: $titleFontSize * $ratio; }
+  h2 { font-size: $h2FontSize * $ratio; }
+  h3 { font-size: $h3FontSize * $ratio; }
+  h4 { font-size: $h4FontSize * $ratio; }
+  h5 { font-size: $h5FontSize * $ratio; }
+  h6 { font-size: $h6FontSize * $ratio; }
+
+  #masthead, blockquote p, section.post, section.content {
+    font-size: $contentFontSize * $ratio;
+  }
+
+  article.well {
+    padding: 12px;
+  }
+
+  article section.title + section.meta {
+    font-size: $metaFontSize * $ratio;
+  }
+
+  section.post, section.content {
+    line-height: 150%;
+  }
+
+  footer.contentinfo {
+    font-size: $footerFontSize * $ratio;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    padding: 0 10px;
+  }
+
+  div.container {
+    margin: 0;
+    width: 100%;
+    overflow: auto;
+    text-overflow: ellipsis;
+  }
+
+  div.branding {
+    text-align: center;
+  }
+
+  div.navigation {
+    text-align: center;
+    & > nav {
+      display: inline-block;
+    }
+  }
+
+  @include responsive-style(1.28571428571429);
+}
+
+@media (max-width: 480px) {
+  @include responsive-style(1.14285714285714);
+}
