@@ -143,6 +143,10 @@ section.post, section.content {
 
 article li { line-height: $contentLineHeight; }
 
+article > section.post.serif {
+  font-family: $serifBodyFonts, $sansBodyFonts, serif;
+}
+
 pre {
   @include spread-text;
 }
