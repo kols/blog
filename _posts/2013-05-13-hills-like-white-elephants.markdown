@@ -50,7 +50,7 @@ The man called "Listen" through the curtain. The woman came out from the bar.
 "It's all right."<br />
 "You want them with water?" asked the woman.<br />
 "Yes, with water."<br />
-"it tastes like liquorice," the girl said and put the glass down.<br />
+"It tastes like liquorice," the girl said and put the glass down.<br />
 "That's the way with everything."<br />
 "Yes," said the girl. "Everything tastes of liquorice. Especially all the
 things you've waited so long for, like absinthe."<br />
@@ -58,7 +58,7 @@ things you've waited so long for, like absinthe."<br />
 "You started it," the girl said. "I was being amused. I was having a fine
 time."<br />
 "Well, let's try and have a fine time."<br />
-"All right,. I was trying. I said the mountains looked like white elephants.
+"All right. I was trying. I said the mountains looked like white elephants.
 Wasn't that bright?"<br />
 "That was bright."<br />
 "I wanted to try this new drink. That's all we do, isn't it -- look at things
@@ -83,7 +83,7 @@ The girl did not say anything.<br />
 and then it's all perfectly natural."<br />
 "Then what will we do afterwards?"<br />
 "We'll be fine afterwards. Just like we were before."<br />
-"What makes ou think so?"<br />
+"What makes you think so?"<br />
 "That's the only thing that bothers us. It's the only thing that's made us
 unhappy."<br />
 The girl looked at the bead curtain, put her hand out and took hold of two of
