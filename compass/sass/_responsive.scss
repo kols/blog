@@ -1,0 +1,41 @@
+@mixin responsive-style($ratio) {
+  nav > ul > li:first-child > a {
+    padding-left: 0;
+  }
+
+  div.container {
+    margin: 0;
+    width: 100%;
+  }
+
+  h1 { font-size: $titleFontSize * $ratio; }
+  h2 { font-size: $h2FontSize * $ratio; }
+  h3 { font-size: $h3FontSize * $ratio; }
+  h4 { font-size: $h4FontSize * $ratio; }
+  h5 { font-size: $h5FontSize * $ratio; }
+  h6 { font-size: $h6FontSize * $ratio; }
+
+  blockquote p {
+    font-size: $contentFontSize * $ratio;
+  }
+
+  article section.title + section.meta {
+    font-size: $metaFontSize * $ratio;
+  }
+
+  section.post, section.content {
+    font-size: $contentFontSize * $ratio;
+  }
+
+  footer.contentinfo {
+    font-size: $footerFontSize * $ratio;
+  }
+}
+
+@media (max-width: 480px) {
+  @include responsive-style(1024 / 480);
+}
+
+@media (max-width: 767px) {
+  @include responsive-style(1024 / 767);
+}
