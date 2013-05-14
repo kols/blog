@@ -1,7 +1,9 @@
 // font
-$headerFont: "Vollkorn", "Georgia", serif;
-$bodyFont: "Proxima Nova", "PT Sans", "Source Sans Pro", "Lucida Grande", "WenQuanYi Micro Hei", "STHeiti", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif;
-$footerFont: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+$serifHeaderFonts: "Vollkorn", "Georgia";
+$serifBodyFonts: "Vollkorn", "Georgia";
+$sansBodyFonts: "Proxima Nova", "PT Sans", "Source Sans Pro", "Lucida Grande", "WenQuanYi Micro Hei", "STHeiti", "WenQuanYi Zen Hei", "Microsoft YaHei";
+$monoFonts: "Source Code Pro", "Monaco", "Consolas", "WenQuanYi Micro Hei Mono";
+$sansFooterFonts: "Helvetica Neue", "Helvetica", "Arial";
 
 // font size
 $titleFontSize: 24.5px;

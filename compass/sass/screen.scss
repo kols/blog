@@ -3,7 +3,7 @@
 
 body {
   background-image: url(/assets/images/gray_jean_@2X.jpg);
-  font-family: $bodyFont;
+  font-family: $sansBodyFonts, sans-serif;
 }
 
 h1 { font-size: $titleFontSize; }
@@ -34,7 +34,7 @@ abbr { font-variant: small-caps; }
 blockquote p { font-size: $contentFontSize; }
 
 code {
-  font-family: "Source Code Pro", "Monaco", "Consolas", "WenQuanYi Micro Hei Mono", "monospace";
+  font-family: $monoFonts, monospace;
   padding: 0px 5px;
   color: $codeColor;
 }
@@ -84,7 +84,7 @@ div.container {
 }
 
 header#masthead {
-  font-family: $headerFont;
+  font-family: $serifHeaderFonts, serif;
   margin: 10px 0 15px;
   & > div.row {
     height: 60px;
@@ -125,7 +125,7 @@ article section.title + section.meta {
   color: $minorGray;
   @include opacity(0.6);
   font-size: $metaFontSize;
-  font-family: $headerFont;
+  font-family: $serifHeaderFonts, serif;
 }
 
 section.post, section.content {
@@ -170,7 +170,7 @@ div.circle {
 }
 
 footer.contentinfo {
-  font-family: $footerFont;
+  font-family: $sansFooterFonts, sans-serif;
   text-align: center;
   color: $minorGray;
   font-size: $footerFontSize;
