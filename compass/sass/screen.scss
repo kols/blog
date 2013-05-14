@@ -30,6 +30,13 @@ article a, footer.contentinfo a {
   }
 }
 
+footer.contentinfo a {
+  &:hover {
+    color: $linkColor;
+    border-bottom: 1px dotted $linkColor;
+  }
+}
+
 abbr { font-variant: small-caps; }
 blockquote p { font-size: $contentFontSize; }
 
@@ -98,6 +105,9 @@ div.branding {
   & > h1 {
     font-weight: 400;
   }
+  a {
+    color: $minorGray;
+  }
 }
 
 nav {
@@ -105,6 +115,19 @@ nav {
     margin: 0;
     a {
       line-height: 40px;
+      color: $minorGray;
+      &:hover {
+        background-color: transparent;
+      }
+      span {
+        &:hover {
+          @include transition-property(text-shadow);
+          @include transition-duration(.4s);
+          @include text-shadow(0 0 1.5px $minorGray);
+          color: $minorGray;
+          border-bottom: 1px dashed $minorGray;
+        }
+      }
     }
   }
 }
