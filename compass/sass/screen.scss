@@ -34,7 +34,7 @@ abbr { font-variant: small-caps; }
 blockquote p { font-size: $contentFontSize; }
 
 code {
-  font-family: "Source Code Pro", "Monaco", "Consolas", "WenQuanYi Micro Hei Mono";
+  font-family: "Source Code Pro", "Monaco", "Consolas", "WenQuanYi Micro Hei Mono", "monospace";
   padding: 0px 5px;
   color: $codeColor;
 }
@@ -81,11 +81,33 @@ article {
 
 div.container {
   width: $containerSize;
-  & > header { font-family: $headerFont; }
 }
 
-section.site-name { margin-left: 2px; }
-section.nav { margin-top: 15px; }
+header#masthead {
+  font-family: $headerFont;
+  margin: 10px 0 15px;
+  & > div.row {
+    height: 60px;
+  }
+}
+
+div.branding {
+  display: block;
+  float: left;
+  margin-left: 20px;
+  & > h1 {
+    font-weight: 400;
+  }
+}
+
+nav {
+  & > ul.nav {
+    margin: 0;
+    a {
+      line-height: 40px;
+    }
+  }
+}
 
 div#content .well {
   margin-bottom: 3em;

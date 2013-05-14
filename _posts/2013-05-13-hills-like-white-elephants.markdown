@@ -6,6 +6,7 @@ date: 2013-05-13 16:42
 comments: true
 categories:
   - fiction
+  - literature
 ---
 By *Ernest Hemingway*
 
