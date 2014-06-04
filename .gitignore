@@ -1,10 +1,8 @@
+.DS_Store
 _site/
 _deploy/
 assets/stylesheets/
 compass/.sass-cache/
-
-### /home/kane/.gitignore-boilerplates/Global/vim.gitignore
-
 .*.sw[a-z]
 *.un~
 Session.vim
