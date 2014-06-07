@@ -7,6 +7,53 @@
     <atom:link href="http://kanedou.me/feed.xml" rel="self" type="application/rss+xml" />
     
       <item>
+        <title>the Bund and Around and You</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://500px.com/photo/72946039/hole-in-bush-by-kane-dou&quot;&gt;
+  &lt;img class=&quot;oob&quot; src=&quot;http://pic.yupoo.com/kols/DOzLBUGc/4xylO.jpg&quot; alt=&quot;Photograph hole in bush by Kane Dou on 500px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://500px.com/photo/72946037/sand-over-river-by-kane-dou&quot;&gt;
+  &lt;img class=&quot;oob&quot; src=&quot;http://pic.yupoo.com/kols/DOzLLXMl/ebtSm.jpg&quot; alt=&quot;Photograph sand over river by Kane Dou on 500px&quot;&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://500px.com/photo/72946041/crowd-and-the-opposite-by-kane-dou&quot;&gt;
+  &lt;img class=&quot;oob&quot; src=&quot;http://pic.yupoo.com/kols/DOzLH6BR/EL1Iy.jpg&quot; alt=&quot;Photograph crowd and the opposite by Kane Dou on 500px&quot;&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://500px.com/photo/72946043/long-lasting-building-by-kane-dou&quot;&gt;
+  &lt;img class=&quot;oob&quot; src=&quot;http://pic.yupoo.com/kols/DOzLjwEN/NEfAL.jpg&quot; alt=&quot;Photograph long-lasting building by Kane Dou on 500px&quot;&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://500px.com/photo/72946045/chandelier-by-kane-dou&quot;&gt;
+  &lt;img class=&quot;oob&quot; src=&quot;http://pic.yupoo.com/kols/DOzLDELx/7ReNm.jpg&quot; alt=&quot;Photograph chandelier by Kane Dou on 500px&quot;&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;这些是六月第一个周末出去经过外滩时拍的。&lt;/p&gt;
+
+&lt;p&gt;主要用了 Hipstamatic 的 BlacKeys SuperGrain 和 BlacKeys Extra Fine 两种胶卷。&lt;/p&gt;
+
+&lt;p&gt;黑与白，稳固的构图，强烈的对比和高锐度很有表现力。&lt;/p&gt;
+
+&lt;p&gt;雾蒙蒙的天，以及对现状、即将来到的改变的不确定感也是贡献之二。&lt;/p&gt;
+
+&lt;p&gt;就像老友说的，“这几张黑白的都很赞！”“我也觉得。”&lt;/p&gt;
+</description>
+        <pubDate>Sun, 08 Jun 2014 00:25:00 +0800</pubDate>
+        <link>http://kanedou.me/2014/06/the-bund-and-around-and-you/</link>
+        <guid isPermaLink="true">http://kanedou.me/2014/06/the-bund-and-around-and-you/</guid>
+      </item>
+    
+      <item>
         <title>How About Restart?</title>
         <description>&lt;p&gt;在这个月初，我辞职了。&lt;/p&gt;
 
@@ -1438,44 +1485,6 @@ WordPress，则需要自定义一项 nginx 设置。&lt;/p&gt;
         <pubDate>Fri, 01 Jul 2011 00:00:00 +0800</pubDate>
         <link>http://kanedou.me/2011/07/wordpress-dotcloud/</link>
         <guid isPermaLink="true">http://kanedou.me/2011/07/wordpress-dotcloud/</guid>
-      </item>
-    
-      <item>
-        <title>用 Python 建英语单词表</title>
-        <description>&lt;p&gt;今天受到 dofine
-同学&lt;a href=&quot;http://blog.dofine.info/2010/10/use-org-mode-to-recite-words.html&quot;&gt;这篇文章&lt;/a&gt;
-的启发，想到也可以用相同的办法（Org-Mode 的 Checkbox）来背平时用
-&lt;a href=&quot;http://stardict.sourceforge.net/&quot;&gt;Stardict&lt;/a&gt; 记下的陌生单词，于是写了一个
-&lt;a href=&quot;http://python.org&quot;&gt;Python&lt;/a&gt; 脚本来将单词整理起来，过程中使用了 Dict.CN 的
-&lt;a href=&quot;http://dict.cn/ws.php?q=word&quot;&gt;API接口&lt;/a&gt; 获取单词的音标，释义以及例句。效果看图：&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://pic.yupoo.com/kols/AAxA5L5B/11io9J.png&quot; title=&quot;owlb1&quot;&gt;&lt;img src=&quot;http://pic.yupoo.com/kols/AAxA5L5B/medium.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-
-&lt;p&gt;输入源：&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;delineate
-parity
-heterogeneous
-deterministic
-heterogeneous,
-Intersect
-impede
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;脚本文件这里找：&lt;a href=&quot;http://github.com/kols/util_scripts/blob/master/owlb.py&quot;&gt;owlb.py&lt;/a&gt;
-，用法为输入一个纯文本单词文件（格式如上：一个单词一行），输出相应 &lt;code&gt;.org&lt;/code&gt; 文件，
-具体请看 &lt;code&gt;python owlb.py --help&lt;/code&gt;。&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;2010/11/05 Updated：&lt;/em&gt;现在脚本可以在原有单词列表上附加新单词，不会重复，只要将原列表作为输出文件即可。&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;2011/03/17 Updated：&lt;/em&gt;重写后，现在的运行速度提高至原版的十倍。&lt;/p&gt;
-</description>
-        <pubDate>Sun, 31 Oct 2010 00:00:00 +0800</pubDate>
-        <link>http://kanedou.me/2010/10/build-word-list-using-python/</link>
-        <guid isPermaLink="true">http://kanedou.me/2010/10/build-word-list-using-python/</guid>
       </item>
     
   </channel>
