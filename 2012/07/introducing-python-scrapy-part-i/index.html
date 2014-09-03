@@ -79,16 +79,14 @@ twisted 的用户也不用担心。</p>
 
 <p>由于 scrapy 是一个 python package，所以先安装 virtualenv 及 pip：</p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>sudo apt-get install virtualenv python-pip
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>sudo apt-get install virtualenv python-pip</code></pre></div>
 
 
 <p>接着安装 scrapy：</p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>virtualenv --no-site-packages scrapy
-<span class="nv">$ </span><span class="nb">source</span> ./scrapy/bin/activate
-<span class="nv">$ </span>pip install scrapy
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>virtualenv --no-site-packages scrapy
+<span class="gp">$ </span><span class="nb">source</span> ./scrapy/bin/activate
+<span class="gp">$ </span>pip install scrapy</code></pre></div>
 
 
 <h2>使用</h2>
@@ -103,13 +101,12 @@ scrapy。示例的结果是得到一份罗森在上海的所有便利店的清�
 
 <p>首先用 scrapy 新建一个 project：</p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>scrapy startproject lawson
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>scrapy startproject lawson</code></pre></div>
 
 
 <p>熟悉一下目录结构：</p>
 
-<div class="highlight"><pre><code class="text">lawson
+<div class="highlight"><pre><code class="language-text" data-lang="text">lawson
 ├── lawson
 │   ├── __init__.py
 │   ├── items.py
@@ -117,8 +114,7 @@ scrapy。示例的结果是得到一份罗森在上海的所有便利店的清�
 │   ├── settings.py
 │   └── spiders
 │       └── __init__.py
-└── scrapy.cfg
-</code></pre></div>
+└── scrapy.cfg</code></pre></div>
 
 
 <ul>
@@ -141,7 +137,7 @@ scrapy。示例的结果是得到一份罗森在上海的所有便利店的清�
 <p>首先定义
 <a href="http://doc.scrapy.org/en/0.14/topics/items.html#module-scrapy.item">Item</a>：</p>
 
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.item</span> <span class="kn">import</span> <span class="n">Item</span><span class="p">,</span> <span class="n">Field</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scrapy.item</span> <span class="kn">import</span> <span class="n">Item</span><span class="p">,</span> <span class="n">Field</span>
 
 
 <span class="k">class</span> <span class="nc">ConvStore</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
@@ -152,8 +148,7 @@ scrapy。示例的结果是得到一份罗森在上海的所有便利店的清�
     <span class="n">city</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
     <span class="n">district</span> <span class="o">=</span> <span class="n">Field</span><span class="p">()</span>
     <span class="n">longitude</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">serializer</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">latitude</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">serializer</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-</code></pre></div>
+    <span class="n">latitude</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">serializer</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code></pre></div>
 
 
 <p>这里定义了一个便利店（<code>ConvStore</code>）所应包含的内容（
@@ -162,7 +157,7 @@ spider 中用到，用来承载其抓取下来的实际数据。</p>
 
 <p>现在来看 spider：</p>
 
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
 <span class="kn">from</span> <span class="nn">scrapy.contrib.spiders</span> <span class="kn">import</span> <span class="n">CrawlSpider</span><span class="p">,</span> <span class="n">Rule</span>
 <span class="kn">from</span> <span class="nn">scrapy.selector</span> <span class="kn">import</span> <span class="n">HtmlXPathSelector</span>
 
@@ -170,29 +165,28 @@ spider 中用到，用来承载其抓取下来的实际数据。</p>
 
 
 <span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">CrawlSpider</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;lawson&#39;</span>
-    <span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;http://www.lawson.com.cn/shops&#39;</span><span class="p">]</span>
-    <span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;lawson.com.cn&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">'lawson'</span>
+    <span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s">'http://www.lawson.com.cn/shops'</span><span class="p">]</span>
+    <span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s">'lawson.com.cn'</span><span class="p">]</span>
     <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">Rule</span><span class="p">(</span><span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r&#39;list\?area_id=\d+&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">),</span>
-                <span class="n">callback</span><span class="o">=</span><span class="s">&#39;parse_store_list&#39;</span><span class="p">),</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r'list</span><span class="err">\</span><span class="s">?area_id=</span><span class="err">\</span><span class="s">d+'</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">'a'</span><span class="p">),</span>
+                <span class="n">callback</span><span class="o">=</span><span class="s">'parse_store_list'</span><span class="p">),</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'//div[@class="ShopList"]/table/tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
             <span class="n">store</span> <span class="o">=</span> <span class="n">ConvStore</span><span class="p">()</span>
-            <span class="n">store</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">u&#39;罗森&#39;</span>
-            <span class="n">store</span><span class="p">[</span><span class="s">&#39;alias&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">u&#39;Lawson&#39;</span>
-            <span class="n">store</span><span class="p">[</span><span class="s">&#39;branch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
-            <span class="n">store</span><span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
-            <span class="n">store</span><span class="p">[</span><span class="s">&#39;district&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;link_text&#39;</span><span class="p">]</span>
-            <span class="n">store</span><span class="p">[</span><span class="s">&#39;city&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">u&#39;上海&#39;</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">'name'</span><span class="p">]</span> <span class="o">=</span> <span class="s">u'罗森'</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">'alias'</span><span class="p">]</span> <span class="o">=</span> <span class="s">u'Lawson'</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">'branch'</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'th/p/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">'address'</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'td/span/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">'district'</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'link_text'</span><span class="p">]</span>
+            <span class="n">store</span><span class="p">[</span><span class="s">'city'</span><span class="p">]</span> <span class="o">=</span> <span class="s">u'上海'</span>
 
-            <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
-</code></pre></div>
+            <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span></code></pre></div>
 
 
 <ul>
@@ -263,16 +257,15 @@ spider 中用到，用来承载其抓取下来的实际数据。</p>
 行结构化定位和内容读取的工具。scrapy 使用它定位到网页中用户所需要的数据并进行抓
 取。</p>
 
-<div class="highlight"><pre><code class="python"><span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
     <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-    <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'//div[@class="ShopList"]/table/tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
         <span class="o">...</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
-        <span class="o">...</span>
-</code></pre></div>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'branch'</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'th/p/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'address'</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'td/span/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+        <span class="o">...</span></code></pre></div>
 
 
 <ul>
@@ -301,7 +294,7 @@ scrapy 中它负责声明单个 Item 的字段及该字段的各种行为（如�
 
 <p><code>dict</code> 接口的用法如上所示很简单，这里说一下 Item Loader。</p>
 
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.contrib.loader</span> <span class="kn">import</span> <span class="n">ItemLoader</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scrapy.contrib.loader</span> <span class="kn">import</span> <span class="n">ItemLoader</span>
 <span class="kn">from</span> <span class="nn">scrapy.contrib.loader.processor</span> <span class="kn">import</span> <span class="n">Compose</span>
 
 <span class="kn">from</span> <span class="nn">lawson.items</span> <span class="kn">import</span> <span class="n">ConvStore</span>
@@ -313,7 +306,7 @@ scrapy 中它负责声明单个 Item 的字段及该字段的各种行为（如�
     <span class="k">def</span> <span class="nf">branch_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">yield</span> <span class="n">v</span> <span class="o">+</span> <span class="s">u&#39;店&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">u&#39;店&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
+            <span class="k">yield</span> <span class="n">v</span> <span class="o">+</span> <span class="s">u'店'</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">u'店'</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
 
 
 <span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">CrawlSpider</span><span class="p">):</span>
@@ -321,19 +314,18 @@ scrapy 中它负责声明单个 Item 的字段及该字段的各种行为（如�
 
     <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'//div[@class="ShopList"]/table/tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
             <span class="n">store</span> <span class="o">=</span> <span class="n">StoreLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">u&#39;罗森&#39;</span><span class="p">)</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;alias&#39;</span><span class="p">,</span> <span class="s">u&#39;Lawson&#39;</span><span class="p">)</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;district&#39;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;link_text&#39;</span><span class="p">])</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;city&#39;</span><span class="p">,</span> <span class="s">u&#39;上海&#39;</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'name'</span><span class="p">,</span> <span class="s">u'罗森'</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'alias'</span><span class="p">,</span> <span class="s">u'Lawson'</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'branch'</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'th/p/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'address'</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'td/span/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'district'</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'link_text'</span><span class="p">])</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'city'</span><span class="p">,</span> <span class="s">u'上海'</span><span class="p">)</span>
 
-            <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
-</code></pre></div>
+            <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span></code></pre></div>
 
 
 <p>Item Loader 的主要作用是对抓取数据的各个字段进行特殊处理，在这里我们定义了一个
@@ -362,9 +354,8 @@ strip 操作。</li>
 
 <p>另一个常用的 Item Loader 是 <code>XPathItemLoader</code>，显然这个版本利用了 XPath：</p>
 
-<div class="highlight"><pre><code class="python"><span class="n">store</span> <span class="o">=</span> <span class="n">XPathItemLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
-<span class="n">store</span><span class="o">.</span><span class="n">add_xpath</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr[2]/th/p/text()&#39;</span><span class="p">)</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">store</span> <span class="o">=</span> <span class="n">XPathItemLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+<span class="n">store</span><span class="o">.</span><span class="n">add_xpath</span><span class="p">(</span><span class="s">'branch'</span><span class="p">,</span> <span class="s">'//div[@class="ShopList"]/table/tr[2]/th/p/text()'</span><span class="p">)</span></code></pre></div>
 
 
 <p>它将字段与 XPath 表达式关联起来，直接完成定位、读取和写入数据的操作，很方便。</p>
@@ -375,7 +366,7 @@ strip 操作。</li>
 罗森网站提供了这个信息，但它并未明文显示，而是需要通过其所链接到的百度地图的页
 面中去抓取下来，听起来很麻烦，但实际却很简单。</p>
 
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urljoin</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urljoin</span>
 
 <span class="kn">from</span> <span class="nn">scrapy.contrib.loader</span> <span class="kn">import</span> <span class="n">XPathItemLoader</span>
 <span class="kn">from</span> <span class="nn">scrapy.http</span> <span class="kn">import</span> <span class="n">Request</span>
@@ -394,11 +385,11 @@ strip 操作。</li>
 
     <span class="k">def</span> <span class="nf">parse_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="n">store</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'store'</span><span class="p">]</span>
 
-        <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">re</span><span class="p">(</span><span class="s">r&#39;(\d+\.\d+),(\d+\.\d+)&#39;</span><span class="p">)</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;latitude&#39;</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;longitude&#39;</span><span class="p">,</span> <span class="n">lng</span><span class="p">)</span>
+        <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">re</span><span class="p">(</span><span class="s">r'(</span><span class="err">\</span><span class="s">d+</span><span class="err">\</span><span class="s">.</span><span class="err">\</span><span class="s">d+),(</span><span class="err">\</span><span class="s">d+</span><span class="err">\</span><span class="s">.</span><span class="err">\</span><span class="s">d+)'</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'latitude'</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'longitude'</span><span class="p">,</span> <span class="n">lng</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
@@ -408,15 +399,14 @@ strip 操作。</li>
             <span class="n">store</span> <span class="o">=</span> <span class="n">StoreLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
             <span class="o">...</span>
 
-            <span class="n">map_rel_url</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/a/@rel&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="n">map_rel_url</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'td/a/@rel'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">map_rel_url</span><span class="p">:</span>
                 <span class="n">map_url</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">get_base_url</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="n">map_rel_url</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">req</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">map_url</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_geo</span><span class="p">)</span>
-                <span class="n">req</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'store'</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span>
                 <span class="k">yield</span> <span class="n">req</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
-</code></pre></div>
+                <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span></code></pre></div>
 
 
 <p>这里为 <code>LawsonSpider</code> 新增了一个方法 <code>parse_geo</code>，同时改写了
@@ -446,7 +436,7 @@ Request 包含的 URL 发出请求，并将其返回的结果封装为 Response 
 
 <p><code>items.py</code> 没有改动，与上文中的一致。</p>
 
-<div class="highlight"><pre><code class="python"><span class="c"># vim: fileencoding=utf-8</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># vim: fileencoding=utf-8</span>
 <span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urljoin</span>
 
 <span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
@@ -466,49 +456,48 @@ Request 包含的 URL 发出请求，并将其返回的结果封装为 Response 
     <span class="k">def</span> <span class="nf">branch_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">yield</span> <span class="n">v</span> <span class="o">+</span> <span class="s">u&#39;店&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">u&#39;店&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
+            <span class="k">yield</span> <span class="n">v</span> <span class="o">+</span> <span class="s">u'店'</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">u'店'</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
 
 
 <span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">CrawlSpider</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;lawson&#39;</span>
-    <span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;http://www.lawson.com.cn/shops&#39;</span><span class="p">]</span>
-    <span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;lawson.com.cn&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">'lawson'</span>
+    <span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s">'http://www.lawson.com.cn/shops'</span><span class="p">]</span>
+    <span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s">'lawson.com.cn'</span><span class="p">]</span>
     <span class="n">rules</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">Rule</span><span class="p">(</span><span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r&#39;list\?area_id=\d+&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">),</span>
-                <span class="n">callback</span><span class="o">=</span><span class="s">&#39;parse_store_list&#39;</span><span class="p">),</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r'list</span><span class="err">\</span><span class="s">?area_id=</span><span class="err">\</span><span class="s">d+'</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">'a'</span><span class="p">),</span>
+                <span class="n">callback</span><span class="o">=</span><span class="s">'parse_store_list'</span><span class="p">),</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">parse_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="n">store</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'store'</span><span class="p">]</span>
 
-        <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">re</span><span class="p">(</span><span class="s">r&#39;(\d+\.\d+),(\d+\.\d+)&#39;</span><span class="p">)</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;latitude&#39;</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;longitude&#39;</span><span class="p">,</span> <span class="n">lng</span><span class="p">)</span>
+        <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">re</span><span class="p">(</span><span class="s">r'(</span><span class="err">\</span><span class="s">d+</span><span class="err">\</span><span class="s">.</span><span class="err">\</span><span class="s">d+),(</span><span class="err">\</span><span class="s">d+</span><span class="err">\</span><span class="s">.</span><span class="err">\</span><span class="s">d+)'</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'latitude'</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'longitude'</span><span class="p">,</span> <span class="n">lng</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">hxs</span> <span class="o">=</span> <span class="n">HtmlXPathSelector</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">store_selectors</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'//div[@class="ShopList"]/table/tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">store_selectors</span><span class="p">:</span>
             <span class="n">store</span> <span class="o">=</span> <span class="n">StoreLoader</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">ConvStore</span><span class="p">(),</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">u&#39;罗森&#39;</span><span class="p">)</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;alias&#39;</span><span class="p">,</span> <span class="s">u&#39;Lawson&#39;</span><span class="p">)</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;branch&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/span/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;district&#39;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;link_text&#39;</span><span class="p">])</span>
-            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">&#39;city&#39;</span><span class="p">,</span> <span class="s">u&#39;上海&#39;</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'name'</span><span class="p">,</span> <span class="s">u'罗森'</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'alias'</span><span class="p">,</span> <span class="s">u'Lawson'</span><span class="p">)</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'branch'</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'th/p/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'address'</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'td/span/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">())</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'district'</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'link_text'</span><span class="p">])</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="s">'city'</span><span class="p">,</span> <span class="s">u'上海'</span><span class="p">)</span>
 
-            <span class="n">map_rel_url</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;td/a/@rel&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+            <span class="n">map_rel_url</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'td/a/@rel'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">map_rel_url</span><span class="p">:</span>
                 <span class="n">map_url</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">get_base_url</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="n">map_rel_url</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">req</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">map_url</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_geo</span><span class="p">)</span>
-                <span class="n">req</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;store&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">'store'</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span>
                 <span class="k">yield</span> <span class="n">req</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span>
-</code></pre></div>
+                <span class="k">yield</span> <span class="n">store</span><span class="o">.</span><span class="n">load_item</span><span class="p">()</span></code></pre></div>
 
 
 <h3>scrapy 命令行工具</h3>
@@ -518,7 +507,7 @@ Request 包含的 URL 发出请求，并将其返回的结果封装为 Response 
 前创建 Project 的时候用到的 <code>startproject</code> 就是其中之一。而除了这个之外，其他工
 具也各自提供了相当有用的功能。</p>
 
-<div class="highlight"><pre><code class="text">$ scrapy
+<div class="highlight"><pre><code class="language-text" data-lang="text">$ scrapy
 Scrapy 0.14.4 - project: lawson
 
 Usage:
@@ -540,16 +529,14 @@ Available commands:
   version       Print Scrapy version
   view          Open URL in browser, as seen by Scrapy
 
-Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
-</code></pre></div>
+Use "scrapy &lt;command&gt; -h" to see more info about a command</code></pre></div>
 
 
 <p>这里仅挑出部分来讲。</p>
 
 <h4><code>shell</code></h4>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>scrapy shell <span class="s1">&#39;http://www.lawson.com.cn/shops&#39;</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>scrapy shell <span class="s1">'http://www.lawson.com.cn/shops'</span></code></pre></div>
 
 
 <p>运行后会进入 Python Interpreter，在这里我们能进行各种试验，配合
@@ -561,15 +548,14 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 </ul>
 
 
-<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">scrapy.contrib.linkextractors.sgml</span> <span class="kn">import</span> <span class="n">SgmlLinkExtractor</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r&#39;list\?area_id=\d+&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract_links</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">SgmlLinkExtractor</span><span class="p">(</span><span class="n">allow</span><span class="o">=</span><span class="s">r'list</span><span class="err">\</span><span class="s">?area_id=</span><span class="err">\</span><span class="s">d+'</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">'a'</span><span class="p">)</span><span class="o">.</span><span class="n">extract_links</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 <span class="n">Out</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
-<span class="p">[</span><span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=1&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u&#39;</span><span class="se">\u957f\u5b81\u533a</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
- <span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=2&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u&#39;</span><span class="se">\u5f90\u6c47\u533a</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
- <span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=3&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u&#39;</span><span class="se">\u9759\u5b89\u533a</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
- <span class="o">...</span>
-</code></pre></div>
+<span class="p">[</span><span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">'http://www.lawson.com.cn/shops/list?area_id=1'</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u'</span><span class="se">\u957f\u5b81\u533a</span><span class="s">'</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+ <span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">'http://www.lawson.com.cn/shops/list?area_id=2'</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u'</span><span class="se">\u5f90\u6c47\u533a</span><span class="s">'</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+ <span class="n">Link</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">'http://www.lawson.com.cn/shops/list?area_id=3'</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">u'</span><span class="se">\u9759\u5b89\u533a</span><span class="s">'</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">nofollow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+ <span class="o">...</span></code></pre></div>
 
 
 <ul>
@@ -577,15 +563,14 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 </ul>
 
 
-<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">fetch</span><span class="p">(</span><span class="s">&#39;http://www.lawson.com.cn/shops/list?area_id=1&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">In</span> <span class="p">[</span><span class="mi">6</span><span class="p">]:</span> <span class="n">fetch</span><span class="p">(</span><span class="s">'http://www.lawson.com.cn/shops/list?area_id=1'</span><span class="p">)</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'//div[@class="ShopList"]/table/tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 <span class="n">Out</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span>
-<span class="p">[</span><span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&lt;tr&gt;&lt;th scope=&quot;row&quot; class=&quot;linetop&quot;&gt;</span><span class="se">\n\t\t\t</span><span class="s">&#39;</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&lt;tr&gt;&lt;th scope=&quot;row&quot; class=&quot;linetop&quot;&gt;</span><span class="se">\n\t\t\t</span><span class="s">&#39;</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&lt;tr&gt;&lt;th scope=&quot;row&quot; class=&quot;linetop&quot;&gt;</span><span class="se">\n\t\t\t</span><span class="s">&#39;</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="o">...</span><span class="p">]</span>
-</code></pre></div>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">'//div[@class="ShopList"]/table/tr'</span> <span class="n">data</span><span class="o">=</span><span class="s">u'&lt;tr&gt;&lt;th scope="row" class="linetop"&gt;</span><span class="se">\n\t\t\t</span><span class="s">'</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">'//div[@class="ShopList"]/table/tr'</span> <span class="n">data</span><span class="o">=</span><span class="s">u'&lt;tr&gt;&lt;th scope="row" class="linetop"&gt;</span><span class="se">\n\t\t\t</span><span class="s">'</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">&lt;</span><span class="n">HtmlXPathSelector</span> <span class="n">xpath</span><span class="o">=</span><span class="s">'//div[@class="ShopList"]/table/tr'</span> <span class="n">data</span><span class="o">=</span><span class="s">u'&lt;tr&gt;&lt;th scope="row" class="linetop"&gt;</span><span class="se">\n\t\t\t</span><span class="s">'</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="o">...</span><span class="p">]</span></code></pre></div>
 
 
 <ul>
@@ -593,14 +578,13 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 </ul>
 
 
-<div class="highlight"><pre><code class="python"><span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;//div[@class=&quot;ShopList&quot;]/table/tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">hxs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'//div[@class="ShopList"]/table/tr'</span><span class="p">)[</span><span class="mi">1</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="p">[</span><span class="s">u&#39;</span><span class="se">\n\t\t\t\t\u53e4\u5317\u65b0\u533a\n\t\t\t\t</span><span class="s">&#39;</span><span class="p">]</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'th/p/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">9</span><span class="p">]:</span> <span class="p">[</span><span class="s">u'</span><span class="se">\n\t\t\t\t\u53e4\u5317\u65b0\u533a\n\t\t\t\t</span><span class="s">'</span><span class="p">]</span>
 
-<span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">]:</span> <span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;th/p/text()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s">u&#39;店&#39;</span>
-<span class="err">古北新区店</span>
-</code></pre></div>
+<span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">]:</span> <span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">'th/p/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s">u'店'</span>
+<span class="err">古北新区店</span></code></pre></div>
 
 
 <p>这是一个相当完善的命令行界面，提供了所有必需的网页分析及抓取工具，十分适合在实
@@ -608,7 +592,7 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 
 <p>而 <code>shell</code> 不仅能从命令行直接调用，还能从程序中调用直接进入以便分析程序做调试：</p>
 
-<div class="highlight"><pre><code class="python"><span class="kn">from</span> <span class="nn">scrapy.shell</span> <span class="kn">import</span> <span class="n">inspect_response</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scrapy.shell</span> <span class="kn">import</span> <span class="n">inspect_response</span>
 
 
 <span class="k">class</span> <span class="nc">LawsonSpider</span><span class="p">(</span><span class="n">BasePoiSpider</span><span class="p">):</span>
@@ -618,8 +602,7 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
         <span class="n">inspect_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">parse_store_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
-        <span class="o">...</span>
-</code></pre></div>
+        <span class="o">...</span></code></pre></div>
 
 
 <p>这样在执行到 <code>parse_geo</code> 时就会掉入 <code>shell</code> 界面，可以做进一步调试。</p>
@@ -628,13 +611,12 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 
 <p>真正的抓取就是通过这个命令执行的：</p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>scrapy crawl lawson
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>scrapy crawl lawson</code></pre></div>
 
 
 
 
-<div class="highlight"><pre><code class="text">2012-07-18 15:14:58+0800 [scrapy] INFO: Scrapy 0.14.4 started (bot: lawson)
+<div class="highlight"><pre><code class="language-text" data-lang="text">2012-07-18 15:14:58+0800 [scrapy] INFO: Scrapy 0.14.4 started (bot: lawson)
 2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled extensions: FeedExporter, LogStats, TelnetConsole, CloseSpider, WebService, CoreStats, SpiderState
 2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled downloader middlewares: HttpAuthMiddleware, DownloadTimeoutMiddleware, UserAgentMiddleware, RetryMiddleware, DefaultHeadersMiddleware, RedirectMiddleware, CookiesMiddleware, HttpCompressionMiddleware, ChunkedTransferMiddleware, DownloaderStats
 2012-07-18 15:14:58+0800 [scrapy] DEBUG: Enabled spider middlewares: HttpErrorMiddleware, OffsiteMiddleware, RefererMiddleware, UrlLengthMiddleware, DepthMiddleware
@@ -646,43 +628,42 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 2012-07-18 15:14:59+0800 [lawson] DEBUG: Crawled (200) &lt;GET http://www.lawson.com.cn/shops&gt; (referer: None)
 2012-07-18 15:14:59+0800 [lawson] DEBUG: Crawled (200) &lt;GET http://www.lawson.com.cn/shops/list?area_id=16&gt; (referer: http://www.lawson.com.cn/shops)
 2012-07-18 15:14:59+0800 [lawson] DEBUG: Scraped from &lt;200 http://www.lawson.com.cn/shops/list?area_id=16&gt;
-    {&#39;address&#39;: u&#39;\u5609\u5b9a\u533a\u5609\u677e\u516c\u8def6128\u53f7&#39;,
-     &#39;alias&#39;: u&#39;Lawson&#39;,
-     &#39;branch&#39;: u&#39;\u540c\u6d4e\u5927\u5b66\u5e97&#39;,
-     &#39;city&#39;: u&#39;\u4e0a\u6d77&#39;,
-     &#39;district&#39;: u&#39;\u5609\u5b9a\u533a&#39;,
-     &#39;name&#39;: u&#39;\u7f57\u68ee&#39;}
+    {'address': u'\u5609\u5b9a\u533a\u5609\u677e\u516c\u8def6128\u53f7',
+     'alias': u'Lawson',
+     'branch': u'\u540c\u6d4e\u5927\u5b66\u5e97',
+     'city': u'\u4e0a\u6d77',
+     'district': u'\u5609\u5b9a\u533a',
+     'name': u'\u7f57\u68ee'}
 ...
 2012-07-18 15:15:01+0800 [lawson] DEBUG: Crawled (200) &lt;GET http://www.lawson.com.cn/shops/199/map&gt; (referer: http://www.lawson.com.cn/shops/list?area_id=12)
 2012-07-18 15:15:01+0800 [lawson] DEBUG: Scraped from &lt;200 http://www.lawson.com.cn/shops/199/map&gt;
-    {&#39;address&#39;: u&#39;\u677e\u6c5f\u533a\u897f\u6797\u5317\u8def1048\u53f7&#39;,
-     &#39;alias&#39;: u&#39;Lawson&#39;,
-     &#39;branch&#39;: u&#39;\u677e\u6c5f\u5987\u5e7c\u4fdd\u5065\u9662\u5e97&#39;,
-     &#39;city&#39;: u&#39;\u4e0a\u6d77&#39;,
-     &#39;district&#39;: u&#39;\u677e\u6c5f\u533a&#39;,
-     &#39;latitude&#39;: u&#39;31.030622&#39;,
-     &#39;longitude&#39;: u&#39;121.225586&#39;,
-     &#39;name&#39;: u&#39;\u7f57\u68ee&#39;}
+    {'address': u'\u677e\u6c5f\u533a\u897f\u6797\u5317\u8def1048\u53f7',
+     'alias': u'Lawson',
+     'branch': u'\u677e\u6c5f\u5987\u5e7c\u4fdd\u5065\u9662\u5e97',
+     'city': u'\u4e0a\u6d77',
+     'district': u'\u677e\u6c5f\u533a',
+     'latitude': u'31.030622',
+     'longitude': u'121.225586',
+     'name': u'\u7f57\u68ee'}
 ...
 2012-07-18 15:15:21+0800 [lawson] INFO: Closing spider (finished)
 2012-07-18 15:15:21+0800 [lawson] INFO: Stored csv feed (320 items) in: lawson_store.csv
 2012-07-18 15:15:21+0800 [lawson] INFO: Dumping spider stats:
-    {&#39;downloader/request_bytes&#39;: 158946,
-     &#39;downloader/request_count&#39;: 309,
-     &#39;downloader/request_method_count/GET&#39;: 309,
-     &#39;downloader/response_bytes&#39;: 1883104,
-     &#39;downloader/response_count&#39;: 309,
-     &#39;downloader/response_status_count/200&#39;: 309,
-     &#39;finish_reason&#39;: &#39;finished&#39;,
-     &#39;finish_time&#39;: datetime.datetime(2012, 7, 18, 7, 15, 21, 905140),
-     &#39;item_scraped_count&#39;: 320,
-     &#39;request_depth_max&#39;: 2,
-     &#39;scheduler/memory_enqueued&#39;: 309,
-     &#39;start_time&#39;: datetime.datetime(2012, 7, 18, 7, 14, 58, 538838)}
+    {'downloader/request_bytes': 158946,
+     'downloader/request_count': 309,
+     'downloader/request_method_count/GET': 309,
+     'downloader/response_bytes': 1883104,
+     'downloader/response_count': 309,
+     'downloader/response_status_count/200': 309,
+     'finish_reason': 'finished',
+     'finish_time': datetime.datetime(2012, 7, 18, 7, 15, 21, 905140),
+     'item_scraped_count': 320,
+     'request_depth_max': 2,
+     'scheduler/memory_enqueued': 309,
+     'start_time': datetime.datetime(2012, 7, 18, 7, 14, 58, 538838)}
 2012-07-18 15:15:21+0800 [lawson] INFO: Spider closed (finished)
 2012-07-18 15:15:21+0800 [scrapy] INFO: Dumping global stats:
-    {}
-</code></pre></div>
+    {}</code></pre></div>
 
 
 <p>从最后的报告中可以看到这个 spider 在一分钟内抓取了该网站全部320条数据
@@ -690,37 +671,13 @@ Use &quot;scrapy &lt;command&gt; -h&quot; to see more info about a command
 
 <p>若要输出抓取结果到一个文件，则加上参数：</p>
 
-<div class="highlight"><pre><code class="sh">scrapy crawl lawson -o store.csv -t csv
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">scrapy crawl lawson -o store.csv -t csv</code></pre></div>
 
 
 <p>这样，这篇 scrapy 使用教程的第一部分就结束了。</p>
 
   </section>
 </article>
-
-
-<section class="comments well">
-  <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
-    var disqus_identifier = 'http://kanedou.me/2012/07/introducing-python-scrapy-part-i/';
-    var disqus_url = 'http://kanedou.me/2012/07/introducing-python-scrapy-part-i/';
-    var disqus_script = 'embed.js';
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-</section>
-
 
 
       </div>

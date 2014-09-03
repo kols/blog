@@ -64,21 +64,20 @@
 
 <p>如果让使用过Vim的人来使用Vimperator，则会觉得很方便快捷，只要稍许看一下帮助文件，了解一下如何打开新链接，并map一些常用的功能到快捷键上，一个适于使用且纯键盘的浏览器就诞生了。而对于从未使用过Vim的同学来说，这个插件也提供了相当丰富的帮助文档，只要有少许耐心，应该也很快就能上手。在这我贴出我的.vimperatorrc文件以供做一个参考，当然，内容还相当少：</p>
 
-<div class="highlight"><pre><code class="vim"><span class="k">set</span> <span class="k">go</span><span class="p">=</span><span class="k">b</span> <span class="c">&quot;图形界面只保留底部滚动条，防止页面过宽而不知道</span>
-<span class="k">set</span> focuscontent <span class="c">&quot;新页面不自动聚焦到输入框，方便浏览</span>
-<span class="k">set</span> <span class="nb">showtabline</span><span class="p">=</span><span class="m">0</span> <span class="c">&quot;不显示tab栏，用插件显示到底下statusline了</span>
-<span class="k">colorscheme</span> myzenburn <span class="c">&quot;设定colorscheme</span>
+<div class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">set</span> <span class="k">go</span><span class="p">=</span><span class="k">b</span> "图形界面只保留底部滚动条，防止页面过宽而不知道
+<span class="k">set</span> focuscontent "新页面不自动聚焦到输入框，方便浏览
+<span class="k">set</span> showtabline<span class="p">=</span><span class="m">0</span> "不显示tab栏，用插件显示到底下statusline了
+<span class="k">colorscheme</span> myzenburn "设定<span class="k">colorscheme</span>
 
-nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="nb">sc</span> :sbclose<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;关闭侧边栏</span>
-nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">sm</span> :sidebar SimilarWeb<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;侧边栏打开similarweb插件</span>
-nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">bm</span> :sidebar Bookmarks<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;侧边栏打开书签</span>
-nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="nb">rl</span> :sidebar Read It Later<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> <span class="c">&quot;侧边栏打开Read it later插件</span>
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span>sc <span class="p">:</span>sbclose<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> "关闭侧边栏
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">sm</span> <span class="p">:</span>sidebar SimilarWeb<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> "侧边栏打开similarweb插件
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">bm</span> <span class="p">:</span>sidebar Bookmarks<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> "侧边栏打开书签
+nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span>rl <span class="p">:</span>sidebar Read It Later<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span> "侧边栏打开Read it later插件
 
-<span class="c">&quot;在gmail和gr里自动屏蔽vimperator快捷键</span>
-<span class="p">:</span>autocmd LocationChange .* <span class="nb">js</span> modes.passAllKeys <span class="p">=</span> <span class="sr">/mail.google.com/</span>.test<span class="p">(</span>buffer.URL<span class="p">)</span>
-<span class="p">:</span>autocmd LocationChange .* <span class="nb">js</span> modes.passAllKeys <span class="p">=</span> <span class="sr">/www.google.com/</span>reader/.test<span class="p">(</span>buffer.URL<span class="p">)</span>
-<span class="c">&quot;:autocmd LocationChange mail.google.com :set editor=gvim -f -c &#39;set ft=mail&#39;&lt;cr&gt;</span>
-</code></pre></div>
+<span class="c">"在gmail和gr里自动屏蔽vimperator快捷键</span>
+<span class="p">:</span>autocmd LocationChange <span class="p">.</span>* js modes<span class="p">.</span>passAllKeys <span class="p">=</span> <span class="sr">/mail.google.com/</span><span class="p">.</span>test<span class="p">(</span>buffer<span class="p">.</span>URL<span class="p">)</span>
+<span class="p">:</span>autocmd LocationChange <span class="p">.</span>* js modes<span class="p">.</span>passAllKeys <span class="p">=</span> <span class="sr">/www.google.com/</span>reader/<span class="p">.</span>test<span class="p">(</span>buffer<span class="p">.</span>URL<span class="p">)</span>
+<span class="c">":autocmd LocationChange mail.google.com :set editor=gvim -f -c 'set ft=mail'&lt;cr&gt;</span></code></pre></div>
 
 
 <p>插件方面我装了<a href="http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/maine_coon.js">隐藏command-line</a>（依赖<a href="http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js">这个脚本</a>），<a href="http://code.google.com/p/vimperator-labs/issues/detail?id=262&amp;colspec=ID%20Summary%20Project%20Type%20Status%20Priority%20Stars%20Owner">goo.gl短网址生成</a>以及<a href="http://code.google.com/p/vimperator-labs/issues/detail?id=128&amp;colspec=ID%20Summary%20Project%20Type%20Status%20Priority%20Stars%20Owner">buftab</a>（将tab放到statusline上）三个，colorscheme则是<a href="http://code.google.com/p/vimperator-labs/issues/detail?id=142&amp;q=colorscheme&amp;colspec=ID%20Summary%20Project%20Type%20Status%20Priority%20Stars%20Owner">myzenburn</a>，在配置文件里也看的到。另外还有<a href="http://vimperator-labs.googlecode.com/hg/vimperator/contrib/vim/syntax/vimperator.vim">vimperator.vim</a>，用来在vim中高亮.vimperatorrc语法。</p>
@@ -87,29 +86,6 @@ nmap <span class="p">&lt;</span><span class="k">silent</span><span class="p">&gt
 
   </section>
 </article>
-
-
-<section class="comments well">
-  <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
-    var disqus_identifier = 'http://kanedou.me/2010/04/its-time-for-an-v-imperator/';
-    var disqus_url = 'http://kanedou.me/2010/04/its-time-for-an-v-imperator/';
-    var disqus_script = 'embed.js';
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-</section>
-
 
 
       </div>

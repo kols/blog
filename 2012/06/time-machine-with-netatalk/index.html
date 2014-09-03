@@ -86,16 +86,14 @@ Machine），它能备份你硬盘上的所有数据到另一个硬盘或者是�
 <p>要支持 OS X 10.7 Lion 就必须安装 2.2 以上的版本，在 Debian 中这个版本在
 <code>wheezy</code> 的源中，若未启用 <code>wheezy</code> 则将下面两行加入 <code>/etc/apt/sources.list</code></p>
 
-<div class="highlight"><pre><code class="text">deb http://mirrors.163.com/debian/ wheezy main contrib non-free
-deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
-</code></pre></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">deb http://mirrors.163.com/debian/ wheezy main contrib non-free
+deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free</code></pre></div>
 
 
 <h3>netatalk</h3>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>apt-get update
-<span class="nv">$ </span>apt-get install -t wheezy netatalk/wheezy libgcrypt11/wheezy
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>apt-get update
+<span class="gp">$ </span>apt-get install -t wheezy netatalk/wheezy libgcrypt11/wheezy</code></pre></div>
 
 
 <p>装 <code>wheezy</code> 中的 <code>libgcrypt11</code> 是因为 <code>netatalk</code> 打包的一个 bug——它默认依赖的
@@ -107,8 +105,7 @@ deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
 <p><code>avahi</code> 实现了 Apple 的 <code>Bonjour</code> 协议，可以让你的服务器直接出现在 Finder 侧边
 栏，并可以让 Time Machine 自动找到对应的网络硬盘，省去每次备份前的手动挂载。</p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>apt-get install avahi-daemon
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>apt-get install avahi-daemon</code></pre></div>
 
 
 <h2>配置</h2>
@@ -117,18 +114,17 @@ deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
 
 <p>在 <code>/etc/netatalk/AppleVolumes.default</code> 末尾加上</p>
 
-<div class="highlight"><pre><code class="text">&lt;path/to/backup/directory&gt; &quot;TimeMachine on $h&quot; allow:&lt;username&gt; cnidscheme:dbd options:upriv,usedots,tm
-</code></pre></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">&lt;path/to/backup/directory&gt; "TimeMachine on $h" allow:&lt;username&gt; cnidscheme:dbd options:upriv,usedots,tm</code></pre></div>
 
 
 <h3>avahi</h3>
 
 <p>新建 <code>/etc/avahi/services/afpd.service</code></p>
 
-<div class="highlight"><pre><code class="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; standalone=&#39;no&#39;?&gt;</span><span class="c">&lt;!--*-nxml-*--&gt;</span>
-<span class="cp">&lt;!DOCTYPE service-group SYSTEM &quot;avahi-service.dtd&quot;&gt;</span>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" standalone='no'?&gt;</span><span class="c">&lt;!--*-nxml-*--&gt;</span>
+<span class="cp">&lt;!DOCTYPE service-group SYSTEM "avahi-service.dtd"&gt;</span>
 <span class="nt">&lt;service-group&gt;</span>
-  <span class="nt">&lt;name</span> <span class="na">replace-wildcards=</span><span class="s">&quot;yes&quot;</span><span class="nt">&gt;</span>%h<span class="nt">&lt;/name&gt;</span>
+  <span class="nt">&lt;name</span> <span class="na">replace-wildcards=</span><span class="s">"yes"</span><span class="nt">&gt;</span>%h<span class="nt">&lt;/name&gt;</span>
   <span class="nt">&lt;service&gt;</span>
     <span class="nt">&lt;type&gt;</span>_afpovertcp._tcp<span class="nt">&lt;/type&gt;</span>
     <span class="nt">&lt;port&gt;</span>548<span class="nt">&lt;/port&gt;</span>
@@ -138,8 +134,7 @@ deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
     <span class="nt">&lt;port&gt;</span>0<span class="nt">&lt;/port&gt;</span>
     <span class="nt">&lt;txt-record&gt;</span>model=Xserve<span class="nt">&lt;/txt-record&gt;</span>
   <span class="nt">&lt;/service&gt;</span>
-<span class="nt">&lt;/service-group&gt;</span>
-</code></pre></div>
+<span class="nt">&lt;/service-group&gt;</span></code></pre></div>
 
 
 <h3>Time Machine</h3>
@@ -147,17 +142,15 @@ deb-src http://mirrors.163.com/debian/ wheezy main contrib non-free
 <p>Time Machine 默认不会显示 AFP 服务器上的网络硬盘，（在 Mac 上）改个参数让它显示
 出来</p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>defaults write com.apple.systempreferences TMShowUnsupportedNetworkVolumes 1
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>defaults write com.apple.systempreferences TMShowUnsupportedNetworkVolumes 1</code></pre></div>
 
 
 <h2>启动</h2>
 
 <p>重启 <code>netatalk</code> 和 <code>avahi</code></p>
 
-<div class="highlight"><pre><code class="sh"><span class="nv">$ </span>service netatalk restart
-<span class="nv">$ </span>service avahi-daemon restart
-</code></pre></div>
+<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span class="gp">$ </span>service netatalk restart
+<span class="gp">$ </span>service avahi-daemon restart</code></pre></div>
 
 
 <p>这时候 Finder 中应该会出现服务器的图标，点击挂载（第一次需要，之后只要 <code>avahi</code>
@@ -172,29 +165,6 @@ alt="Finder" /></p>
 
   </section>
 </article>
-
-
-<section class="comments well">
-  <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
-    var disqus_identifier = 'http://kanedou.me/2012/06/time-machine-with-netatalk/';
-    var disqus_url = 'http://kanedou.me/2012/06/time-machine-with-netatalk/';
-    var disqus_script = 'embed.js';
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-</section>
-
 
 
       </div>

@@ -462,81 +462,78 @@ sitting at the table and smiled at him.</p>
 
 <p>整理一下需求：首先是 original, cover, preview 及 thumbnail 这四个基础的实际生成 URL 的生成器，然后是 mobile 及 desktop 这两个构筑在前四者之上的抽象分类。</p>
 
-<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">OriginalUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span class="k">type</span><span class="x"> </span><span class="n">OriginalUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">OriginalUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">CoverUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">CoverUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">CoverUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">PreviewUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">PreviewUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">PreviewUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">ThumbnailUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
-</code></pre></div>
+</span><span class="k">type</span><span class="x"> </span><span class="n">ThumbnailUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">ThumbnailUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span></code></pre></div>
 
 
 <p>这里我们先声明了四种不同 URL 的 interface，这是为了之后的 composition 更方便。</p>
 
-<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">OriginalUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span class="k">type</span><span class="x"> </span><span class="n">OriginalUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">OriginalUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">Original</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>  <span class="c1">// a model, the source we use to generate the URL, just a stab to complete the logic, pay no attention to it.</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">Original</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">image</span><span class="x"> </span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Image</span><span class="x">  </span><span class="c">// a model, the source we use to generate the URL, just a stab to complete the logic, pay no attention to it.</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">o</span> <span class="nx">Original</span><span class="p">)</span> <span class="nx">OriginalUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate original URL}</span>
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">o</span><span class="x"> </span><span class="n">Original</span><span class="p">)</span><span class="x"> </span><span class="n">OriginalUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="p">{</span><span class="c">// generate original URL}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">CoverUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">CoverUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">CoverUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">Cover</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">Cover</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">image</span><span class="x"> </span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Image</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="nx">Cover</span><span class="p">)</span> <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate cover URL}</span>
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="n">Cover</span><span class="p">)</span><span class="x"> </span><span class="n">CoverUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="p">{</span><span class="c">// generate cover URL}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">PreviewUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">PreviewUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">PreviewUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">Preview</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">Preview</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">image</span><span class="x"> </span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Image</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Preview</span><span class="p">)</span> <span class="nx">PreviewUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate preview URL}</span>
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">p</span><span class="x"> </span><span class="n">Preview</span><span class="p">)</span><span class="x"> </span><span class="n">PreviewUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="p">{</span><span class="c">// generate preview URL}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">ThumbnailUrlBuilder</span> <span class="kd">interface</span> <span class="p">{</span>
-    <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">ThumbnailUrlBuilder</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">ThumbnailUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">Thumbnail</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
-<span class="p">}</span>
+</span><span class="k">type</span><span class="x"> </span><span class="n">Thumbnail</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">image</span><span class="x"> </span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Image</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="nx">Thumbnail</span><span class="p">)</span> <span class="nx">ThumbnailUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span><span class="c1">// generate thumbnail URL}</span>
-</code></pre></div>
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">t</span><span class="x"> </span><span class="n">Thumbnail</span><span class="p">)</span><span class="x"> </span><span class="n">ThumbnailUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="p">{</span><span class="c">// generate thumbnail URL}</span></code></pre></div>
 
 
 <p>声明各个具体的 builder 并实现 interface。接下来是两个分类。</p>
 
-<div class="highlight"><pre><code class="go"><span class="kd">type</span> <span class="nx">Desktop</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="o">*</span><span class="nx">Original</span>
-    <span class="o">*</span><span class="nx">Preview</span>
-    <span class="o">*</span><span class="nx">Thumbnail</span>
-<span class="p">}</span>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span class="k">type</span><span class="x"> </span><span class="n">Desktop</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="o">*</span><span class="n">Original</span><span class="x">
+    </span><span class="o">*</span><span class="n">Preview</span><span class="x">
+    </span><span class="o">*</span><span class="n">Thumbnail</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">type</span> <span class="nx">Mobile</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="o">*</span><span class="nx">Original</span>
-    <span class="o">*</span><span class="nx">Cover</span>
-<span class="p">}</span>
-</code></pre></div>
+</span><span class="k">type</span><span class="x"> </span><span class="n">Mobile</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="o">*</span><span class="n">Original</span><span class="x">
+    </span><span class="o">*</span><span class="n">Cover</span><span class="x">
+</span><span class="p">}</span></code></pre></div>
 
 
 <p>这里的实现使用了 struct embedding，这里内嵌了基础 builder 的 pointer，效果是直接将内嵌 struct 的所有 method 带入新声明的 struct。这里有几点需要注意：</p>
@@ -547,14 +544,13 @@ sitting at the table and smiled at him.</p>
 </ul>
 
 
-<div class="highlight"><pre><code class="go"><span class="c1">// when we call embedded method directly on the outer struct</span>
-<span class="nx">d</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>
-<span class="c1">// it&#39;s exactly like first defining this book-keeping method on the outer struct and then calling it</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">d</span> <span class="nx">Desktop</span><span class="p">)</span> <span class="nx">CoverUrl</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
-    <span class="nx">d</span><span class="p">.</span><span class="nx">Cover</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>  <span class="c1">// receiver is `Cover&#39; not `Desktop&#39;</span>
-<span class="p">}</span>
-<span class="nx">d</span><span class="p">.</span><span class="nx">CoverUrl</span><span class="p">()</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span class="c">// when we call embedded method directly on the outer struct</span><span class="x">
+</span><span class="n">d</span><span class="o">.</span><span class="n">CoverUrl</span><span class="p">()</span><span class="x">
+</span><span class="c">// it's exactly like first defining this book-keeping method on the outer struct and then calling it</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">d</span><span class="x"> </span><span class="n">Desktop</span><span class="p">)</span><span class="x"> </span><span class="n">CoverUrl</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">d</span><span class="o">.</span><span class="n">Cover</span><span class="o">.</span><span class="n">CoverUrl</span><span class="p">()</span><span class="x">  </span><span class="c">// receiver is `Cover' not `Desktop'</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span><span class="n">d</span><span class="o">.</span><span class="n">CoverUrl</span><span class="p">()</span></code></pre></div>
 
 
 <ul>
@@ -565,38 +561,37 @@ sitting at the table and smiled at him.</p>
 
 <p>之后看一下如何实际使用这些 URL builder。</p>
 
-<div class="highlight"><pre><code class="go"><span class="kd">func</span> <span class="nx">GetUrlBuilder</span><span class="p">(</span><span class="nx">reqType</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="nx">builder</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">image</span> <span class="o">*</span><span class="nx">models</span><span class="p">.</span><span class="nx">Image</span>
-    <span class="k">switch</span> <span class="nx">reqType</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="s">&quot;desktop&quot;</span><span class="p">:</span>
-        <span class="nx">o</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Original</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
-        <span class="nx">p</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Preview</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
-        <span class="nx">t</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Thumbnail</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
-        <span class="nx">builder</span> <span class="p">=</span> <span class="nx">Desktop</span><span class="p">{</span><span class="nx">o</span><span class="p">,</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">t</span><span class="p">}</span>
-    <span class="k">case</span> <span class="s">&quot;mobile&quot;</span><span class="p">:</span>
-        <span class="nx">o</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Original</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
-        <span class="nx">c</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">Cover</span><span class="p">{</span><span class="nx">image</span><span class="p">}</span>
-        <span class="nx">builder</span> <span class="p">=</span> <span class="nx">Mobile</span><span class="p">{</span><span class="nx">o</span><span class="p">,</span> <span class="nx">c</span><span class="p">}</span>
-    <span class="k">default</span><span class="p">:</span>
-        <span class="nb">panic</span><span class="p">(</span><span class="s">&quot;Oooops, don&#39;t know which type it is!&quot;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span>
-<span class="p">}</span>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span class="k">func</span><span class="x"> </span><span class="n">GetUrlBuilder</span><span class="p">(</span><span class="n">reqType</span><span class="x"> </span><span class="kt">string</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">builder</span><span class="x"> </span><span class="k">interface</span><span class="p">{})</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="k">var</span><span class="x"> </span><span class="n">image</span><span class="x"> </span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Image</span><span class="x">
+    </span><span class="k">switch</span><span class="x"> </span><span class="n">reqType</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="k">case</span><span class="x"> </span><span class="s">"desktop"</span><span class="o">:</span><span class="x">
+        </span><span class="n">o</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">Original</span><span class="p">{</span><span class="n">image</span><span class="p">}</span><span class="x">
+        </span><span class="n">p</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">Preview</span><span class="p">{</span><span class="n">image</span><span class="p">}</span><span class="x">
+        </span><span class="n">t</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">Thumbnail</span><span class="p">{</span><span class="n">image</span><span class="p">}</span><span class="x">
+        </span><span class="n">builder</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">Desktop</span><span class="p">{</span><span class="n">o</span><span class="p">,</span><span class="x"> </span><span class="n">p</span><span class="p">,</span><span class="x"> </span><span class="n">t</span><span class="p">}</span><span class="x">
+    </span><span class="k">case</span><span class="x"> </span><span class="s">"mobile"</span><span class="o">:</span><span class="x">
+        </span><span class="n">o</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">Original</span><span class="p">{</span><span class="n">image</span><span class="p">}</span><span class="x">
+        </span><span class="n">c</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">Cover</span><span class="p">{</span><span class="n">image</span><span class="p">}</span><span class="x">
+        </span><span class="n">builder</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">Mobile</span><span class="p">{</span><span class="n">o</span><span class="p">,</span><span class="x"> </span><span class="n">c</span><span class="p">}</span><span class="x">
+    </span><span class="k">default</span><span class="o">:</span><span class="x">
+        </span><span class="nb">panic</span><span class="p">(</span><span class="s">"Oooops, don't know which type it is!"</span><span class="p">)</span><span class="x">
+    </span><span class="p">}</span><span class="x">
+    </span><span class="k">return</span><span class="x">
+</span><span class="p">}</span><span class="x">
 
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">reqType</span> <span class="o">:=</span> <span class="nx">GetRequestTypeFromNowhere</span><span class="p">()</span>  <span class="c1">// fake</span>
-    <span class="nx">urlBuilder</span> <span class="o">:=</span> <span class="nx">GetUrlBuilder</span><span class="p">(</span><span class="nx">reqType</span><span class="p">)</span>
-    <span class="k">switch</span> <span class="nx">reqType</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="s">&quot;desktop&quot;</span><span class="p">:</span>
-        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">OriginalUrlBuilder</span><span class="p">).</span><span class="nx">OriginalUrl</span><span class="p">()</span>  <span class="c1">// original URL</span>
-        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">PreviewUrlBuilder</span><span class="p">).</span><span class="nx">PreviewUrl</span><span class="p">()</span>  <span class="c1">// preview URL</span>
-        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">ThumbnailUrlBuilder</span><span class="p">).</span><span class="nx">ThumbnailUrl</span><span class="p">()</span>  <span class="c1">// thumbnail URL</span>
-    <span class="k">case</span> <span class="s">&quot;mobile&quot;</span><span class="p">:</span>
-        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">OriginalUrlBuilder</span><span class="p">).</span><span class="nx">OriginalUrl</span><span class="p">()</span>  <span class="c1">// original URL</span>
-        <span class="nx">urlBuilder</span><span class="p">.(</span><span class="nx">CoverUrlBuilder</span><span class="p">).</span><span class="nx">CoverUrl</span><span class="p">()</span>  <span class="c1">// cover URL</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+</span><span class="k">func</span><span class="x"> </span><span class="n">main</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="n">reqType</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">GetRequestTypeFromNowhere</span><span class="p">()</span><span class="x">  </span><span class="c">// fake</span><span class="x">
+    </span><span class="n">urlBuilder</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">GetUrlBuilder</span><span class="p">(</span><span class="n">reqType</span><span class="p">)</span><span class="x">
+    </span><span class="k">switch</span><span class="x"> </span><span class="n">reqType</span><span class="x"> </span><span class="p">{</span><span class="x">
+    </span><span class="k">case</span><span class="x"> </span><span class="s">"desktop"</span><span class="o">:</span><span class="x">
+        </span><span class="n">urlBuilder</span><span class="o">.</span><span class="p">(</span><span class="n">OriginalUrlBuilder</span><span class="p">)</span><span class="o">.</span><span class="n">OriginalUrl</span><span class="p">()</span><span class="x">  </span><span class="c">// original URL</span><span class="x">
+        </span><span class="n">urlBuilder</span><span class="o">.</span><span class="p">(</span><span class="n">PreviewUrlBuilder</span><span class="p">)</span><span class="o">.</span><span class="n">PreviewUrl</span><span class="p">()</span><span class="x">  </span><span class="c">// preview URL</span><span class="x">
+        </span><span class="n">urlBuilder</span><span class="o">.</span><span class="p">(</span><span class="n">ThumbnailUrlBuilder</span><span class="p">)</span><span class="o">.</span><span class="n">ThumbnailUrl</span><span class="p">()</span><span class="x">  </span><span class="c">// thumbnail URL</span><span class="x">
+    </span><span class="k">case</span><span class="x"> </span><span class="s">"mobile"</span><span class="o">:</span><span class="x">
+        </span><span class="n">urlBuilder</span><span class="o">.</span><span class="p">(</span><span class="n">OriginalUrlBuilder</span><span class="p">)</span><span class="o">.</span><span class="n">OriginalUrl</span><span class="p">()</span><span class="x">  </span><span class="c">// original URL</span><span class="x">
+        </span><span class="n">urlBuilder</span><span class="o">.</span><span class="p">(</span><span class="n">CoverUrlBuilder</span><span class="p">)</span><span class="o">.</span><span class="n">CoverUrl</span><span class="p">()</span><span class="x">  </span><span class="c">// cover URL</span><span class="x">
+    </span><span class="p">}</span><span class="x">
+</span><span class="p">}</span></code></pre></div>
 
 
 <p><code>GetUrlBuilder()</code> 返回 <code>interface{}</code>，即使用者不知道所返回的究竟是 <code>Desktop</code> 还是 <code>Mobile</code>。因为使用者只需负责使用就可以了，<code>desktop.(PreviewUrlBuilder).PreviewUrl()</code> 对所返回的 builder 先进行 type assertion 再调用相应 interface 中的方法，即我需要一个 preview URL 则我就调用 <code>PreviewUrlBuilder</code> 中的 <code>PreviewUrl()</code> 方法来获取这样一个 URL，除此以外我不需要知道其他任何信息，builder 的种类为何对使用者而言是透明的。而这也是最初声明四个不同基础 builder 的 interface 的好处之一。</p>

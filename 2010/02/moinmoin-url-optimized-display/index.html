@@ -65,18 +65,16 @@ url 不美观的问题，例如：<code>http://example.com/moin.cgi</code> ，�
 
 <p>首先在位于网站根目录下的 <code>.htaccess</code> 文件中加入如下语句：</p>
 
-<div class="highlight"><pre><code class="apache"><span class="nb">RewriteEngine</span> <span class="k">On</span>
-<span class="nb">RewriteBase</span> /
-<span class="nb">RewriteRule</span> ^wiki(.*)$ path/to/moin.cgi/$1 [L]
-</code></pre></div>
+<div class="highlight"><pre><code class="language-apache" data-lang="apache">RewriteEngine On
+RewriteBase /
+RewriteRule ^wiki(.*)$ path/to/moin.cgi/$1 [L]</code></pre></div>
 
 
 <p>其中第四行的 wiki 可以改成任意希望的路径。在例子中，这会使所有向<code>http://example.com/wiki</code> 发出的请求转发到 <code>moin.cgi</code> 这个脚本文件，同时不改变url 的显示。此时在浏览器中访问 <code>http://example.com/wiki</code> 应该能正常显示 wiki 首页。</p>
 
 <p>之后在 <code>moin.cgi</code> 中加入如下语句:</p>
 
-<div class="highlight"><pre><code class="python"><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;SCRIPT_NAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;/wiki&#39;</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">'SCRIPT_NAME'</span><span class="p">]</span> <span class="o">=</span> <span class="s">'/wiki'</span></code></pre></div>
 
 
 <p>这句的作用是使 moin 自己生成的 url 显示正常。如果没有这一句，则 wiki 首页 url 在上一步设置后变得正常，但 wiki 中任何一个超链接的 url 都仍然带有 <code>moin.cgi</code>。</p>
@@ -85,29 +83,6 @@ url 不美观的问题，例如：<code>http://example.com/moin.cgi</code> ，�
 
   </section>
 </article>
-
-
-<section class="comments well">
-  <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'kdblue'; // required: replace example with your forum shortname
-    var disqus_identifier = 'http://kanedou.me/2010/02/moinmoin-url-optimized-display/';
-    var disqus_url = 'http://kanedou.me/2010/02/moinmoin-url-optimized-display/';
-    var disqus_script = 'embed.js';
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-</section>
-
 
 
       </div>
