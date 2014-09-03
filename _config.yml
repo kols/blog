@@ -4,7 +4,7 @@ url: http://kanedou.me
 base_url: /
 markdown: rdiscount
 exclude: [Gemfile, Gemfile.lock, Rakefile, compass]
-highlighter: rogue
+highlighter: rouge
 excerpt_separator: '__NONSENSE__'
 
 # Disqus Comments
