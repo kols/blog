@@ -1,0 +1,8 @@
+srv:
+  image: kane/blog
+  entrypoint: /bin/bash
+  command: -l -c 'bundle exec jekyll serve'
+  volumes:
+    - /Users/Kane:/home/kane
+  ports:
+    - "4000:4000"
