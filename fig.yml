@@ -1,5 +1,5 @@
 srv:
-  image: kane/blog
+  build: .
   entrypoint: /bin/bash
   command: -l -c 'bundle exec jekyll serve'
   volumes:

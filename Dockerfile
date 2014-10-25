@@ -1,12 +1,12 @@
-FROM kane/ruby:2.1.3
+FROM kane/ruby:0.1r2.1.3
 
 WORKDIR /tmp
-
 USER root
-RUN apt-get install -y nodejs
+RUN apt-get update \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 USER kane
-
 ADD Gemfile* /tmp/
 RUN bash -l -c 'bundle install'
 
