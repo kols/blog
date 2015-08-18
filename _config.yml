@@ -9,3 +9,5 @@ excerpt_separator: '__NONSENSE__'
 
 # Disqus Comments
 disqus_short_name: kdblue
+gems:
+  - jekyll-sitemap
