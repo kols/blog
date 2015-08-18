@@ -3,7 +3,7 @@ permalink: /:year/:month/:title/
 url: http://kanedou.me
 base_url: /
 markdown: rdiscount
-exclude: [Gemfile, Gemfile.lock, Rakefile, compass]
+exclude: [Gemfile, Gemfile.lock, Rakefile, compass, Dockerfile, fig.yml]
 highlighter: rouge
 excerpt_separator: '__NONSENSE__'
 

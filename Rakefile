@@ -31,9 +31,9 @@ task :deploy => [:prepare_deploy, :generate] do |t|
   cp_r "#{GEN_CONTENT_DIR}/.", "#{DEPLOY_DIR}"
   cd DEPLOY_DIR do
     sh "git checkout #{GH_PAGES_BRANCH}"
-    sh "git pull origin #{GH_PAGES_BRANCH}"
     sh "git add -A ."
     sh "git commit -m 'Update'" rescue nil
+    sh "git pull --rebase origin #{GH_PAGES_BRANCH}"
     sh "git push origin #{GH_PAGES_BRANCH}"
   end
 end
